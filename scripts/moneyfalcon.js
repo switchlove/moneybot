@@ -24,7 +24,6 @@
 // SOFTWARE.
 /* END LICENSE */ 
 
-
 /** VARIABLE DECLARATIONS */ 
 var username = 'beebo' 
 var startingbet = 1; 
@@ -79,7 +78,10 @@ var usersplaying = [];
 var falconexample = "FALCON mimic abc";
 var mimicbet = 0; 
 var falconregexp = /(?:^|\s)FALCON\s(.*?)\s(.*?)\s(.*)(?:\s|$)/g;
-
+var gamemode = "MARTINGALE"; 
+var martingalecount = 0; 
+var martingalebet = startingbet; 
+var martingaletpi = takeprofitpoint; 
 
 /** BEGIN ENGINE INSTRUCTIONS */ 
 engine.on('game_starting', start_game); 
@@ -125,19 +127,25 @@ function start_game(gamedata) {
     summarize(); 
     pregamebalance = engine.getBalance(); 
 
-    if (mimic == true) { 
+
+    console.log('balance before game #' + gameselapsed + ': ' + pregamebalance); 
+
+    if (gamemode == 'MIMIC') { 
         currentbet = mimicbet; 
-        var themultiplier = 1000; 
+        var themultiplier = 1900; 
         engine.placeBet(formatbet(currentbet), themultiplier, false); 
         mimic = false; 
-    } else if (chatbet == true) { 
-        var thebet = (engine.getBalance() / 100) * 0.05; 
-        var themultiplier = 200; 
-        currentbet = thebet; 
+        gamemode = "MARTINGALE"; 
+        currentbet = startingbet; 
+    } else if (gamemode == 'MARTINGALE') { 
+        // var themultiplier = 1900; 
+        martingaletpi = Math.round(martingaletpi).toFixed(0);  
 
-        engine.placeBet(formatbet(currentbet), themultiplier, false); 
-        chatbet = false; 
-    } 
+        martingaletpi = parseInt("" + martingaletpi);        
+        console.log('calling placebet ' + martingalebet + ' with take profit multiplier of ' + martingaletpi); 
+        engine.placeBet(formatbet(martingalebet), martingaletpi, false); 
+    }
+
     // gamerecords[gameselapsed] = {}; 
     // gamerecords[gameselapsed]['cashouts'] = []; 
     // gamerecords[gameselapsed]['initial_bets'] = {}; 
@@ -158,12 +166,22 @@ function cashout(gamedata) {
 } 
 
 function play_game(gamedata) { 
-    console.log("we are now playing the game");
-    var randindex = Math.random() * gamedata.length + 1
-    console.log('index ' + randindex); 
-    console.log(JSON.stringify(gamedata[randindex]));  
-    console.log('game #' + gameselapsed); 
+    var randindex = Math.floor((Math.random() * 10) + 1); // do not touch
 
+    var count = 0; 
+    for (var curuser in gamedata) { 
+        if (count == randindex) { 
+            console.log('THE RANDOM USER IS ' + curuser); 
+        }
+        count++; 
+        // count++; 
+    }
+    if (verbose == true) { 
+        console.log('index ' + randindex); 
+        console.log("we are now playing the game");
+        console.log(JSON.stringify(gamedata));  
+        console.log('game #' + gameselapsed); 
+    } 
 
     curgamerecord = gamedata; 
 
@@ -214,9 +232,12 @@ function process_player_bet(gamedata) {
 }
 
 function process_chat_message(gamedata) { 
-    console.log('--------- CHAT MESSAGE BELOW -----------'); 
-    console.log(JSON.stringify(gamedata)); 
-    if (gamedata.username == 'beebo') { 
+    if (verbose == true) { 
+        console.log('--------- CHAT MESSAGE BELOW -----------'); 
+        console.log(JSON.stringify(gamedata)); 
+        console.log('---------- END CHAT MESSAGE ------------');
+    } 
+    if (gamedata.username == username) { 
         var match = falconregexp.exec(gamedata.message);
 
         if (match != undefined) { 
@@ -226,6 +247,7 @@ function process_chat_message(gamedata) {
                 targetmimic = mimicuser; 
                 var amount = match[3]; 
                 mimic = true; 
+                gamemode = "MIMIC"; 
                 mimicbet = parseInt(amount); 
                 engine.chat('[FALCONBOT]: we will bet ' + mimicbet + ' bits and cash out the same time ' + mimicuser +' does next round (or 10x, whatever comes first)... [if ' + mimicuser + ' is not playing in the next round we will pick a user to follow at random]'); 
             } 
@@ -247,7 +269,11 @@ function process_chat_message(gamedata) {
                 engine.chat('[FALCONBOT]: Games Played: ' + gamesplayedcount + ' | Games Elapsed: ' + gameselapsed + ' | Games Won: ' + numwinners + ' | Games Lost: ' + numlosers + " | Median: " + historicalmedian); 
             } 
 
-
+            if (gamedata.message == 'FALCON martingale') { 
+                console.log('Setting game mode to martingale');
+                gamemode = "MARTINGALE"; 
+                engine.chat('[FALCONBOT]: Martingale mode activated.'); 
+            }
 
 
         // if (gamedata.message == 'FALCON 5% doubler') { 
@@ -273,7 +299,6 @@ function process_chat_message(gamedata) {
         }
 
     }
-    console.log('---------- END CHAT MESSAGE ------------');
 } 
 /** END ENGINE LOGIC */ 
 
@@ -312,7 +337,7 @@ function log_post_game_data(gamedata) {
     console.log('Game is finished - JSON shown below'); 
     // console.log(JSON.stringify(gamedata)); 
     gamehistory.push(gamedata); 
-    // console.log(JSON.stringify(gamehistory)); 
+    // console.log(JSON.stringify(gamehistory)); ingale
     summarize_history(gamedata); 
     console.log('MEDIAN: ' + historicalmedian); 
     var gameresultstatus = engine.lastGamePlay(); 
@@ -330,12 +355,29 @@ function log_post_game_data(gamedata) {
         numskipped++; 
     } 
 
-    if (mimic == true) { 
+    if (gamemode == 'MIMIC' && mimic == true) { 
         if (laststatus == 'WON') { 
             engine.chat('[FALCONBOT] We mimicked ' + targetmimic + ' successfully and won the game!'); 
         } else if (laststatus == 'LOST') { 
             engine.chat('[FALCONBOT] We mimicked ' + targetmimic + ' and failed miserably'); 
         }
+    } 
+
+    if (gamemode == 'MARTINGALE') { 
+
+        if (laststatus == 'WON') { 
+           console.log('We won the martingale after ' + martingalecount + ' games.'); 
+            martingalecount = 0; 
+            martingalebet = startingbet; 
+        } else if (laststatus == 'LOST') {
+            martingalecount++; 
+            console.log("we lost the martingale (turn number " + martingalecount + ')'); 
+            martingalebet = martingalebet * betincrement; 
+            martingaletpi = martingaletpi * takeprofitincrementinterval
+            console.log('next game will use bet of ' + martingalebet + ' with a take profit multiplier of ' + martingaletpi); 
+        }
+
+
     } 
 
     gameselapsed++; 
@@ -362,6 +404,7 @@ function summarize_history(gamedata) {
       medianvalues.push(gamehistoryitem.game_crash); 
     }
     historicalmedian = median(medianvalues); 
+    return historicalmedian; 
 
 } 
 
@@ -394,15 +437,21 @@ function calculate_net_profits() {
 }
 
 function summarize() { 
-    console.log('============================================'); 
-    console.log('==> Starting game... '); 
-    console.log('==> Gross Winnings: ' + grosswinnings); 
-    console.log('==> Gross Losses: ' + grosslosses); 
-    console.log('==> Gain/Loss of ' + totalprofit); 
-    console.log('==> # of games won: ' + numwinners); 
-    console.log('==> # of games lost: ' + numlosers); 
-    console.log('==> % of games won: ' + winrate + numlosers); 
-    console.log('==> # of games elapsed: ' + gameselapsed); 
+    if (verbose == true) { 
+        console.log('============================================'); 
+        console.log('==> Starting game... '); 
+        console.log('==> Gross Winnings: ' + grosswinnings); 
+        console.log('==> Gross Losses: ' + grosslosses); 
+        console.log('==> Gain/Loss of ' + totalprofit); 
+        console.log('==> # of games won: ' + numwinners); 
+        console.log('==> # of games lost: ' + numlosers); 
+        console.log('==> % of games won: ' + winrate + numlosers); 
+        console.log('==> # of games elapsed: ' + gameselapsed); 
+        console.log('============================================'); 
+
+    } else { 
+        console.log('starting new game -- wins: ' + numwinners + ' | losses: ' + numlosers + ' | grosswinnings: ' + grosswinnings + ' | grosslosses:' + grosslosses + " | totalprofit: " + totalprofit); 
+    }
 
 }
 
