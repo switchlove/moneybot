@@ -80,7 +80,7 @@ var usersplaying = [];
 var falconexample = "FALCON mimic abc";
 var mimicbet = 0; 
 var falconregexp = /(?:^|\s)FALCON\s(.*?)\s(.*?)\s(.*)(?:\s|$)/g;
-var gamemode = "NOT_SPECIFIED"; 
+var gamemode = "MARTINGALE"; 
 var martingalecount = 0; 
 var martingalebet = startingbet; 
 var martingaletpi = takeprofitpoint; 
@@ -367,14 +367,14 @@ function log_post_game_data(gamedata) {
     } 
 
     if (gamemode == 'MARTINGALE') { 
-        if (gamedata.game_crash < playgamecriteria) { 
-            martingalecount = martingalecount + 1; 
-            console.log('martingale count: ' + martingalecount + ' out of ' + gamewaitcount); 
+        // if (gamedata.game_crash < playgamecriteria) { 
+        //     martingalecount = martingalecount + 1; 
+        //     // console.log('martingale count: ' + martingalecount + ' out of ' + gamewaitcount); 
 
-        } else { 
-            martingalecount = 0; 
-            console.log('Martingale count reset to 0'); 
-        }
+        // } else { 
+        //     martingalecount = 0; 
+        //     console.log('Martingale count reset to 0'); 
+        // }
         if (laststatus == 'WON') { 
            console.log('We won the martingale after ' + martingalecount + ' games.'); 
             martingalebet = startingbet; 
@@ -399,14 +399,6 @@ function log_post_game_data(gamedata) {
         console.log("MANUAL PLAY DETECTED DURING COOLDOWN - Last game (" + laststatus + ") does not count toward required cooldown target of " + cooldowncount + ' games.')
     }
     gameselapsed++; 
-    // if (gamedata.game_crash < playgamecriteria) { 
-    //     martingalewaitcount++;
-    //     console.log("waited for " + martingalewaitcount + ' out of ' + gamewaitcount + ' games below ' + playgamecriteria + ' which is required to occur required before playing ') 
-    // } else { 
-    //     martingalewaitcount = 0; 
-    //     console.log("waited for " + martingalewaitcount + ' out of ' + gamewaitcount + ' games below ' + playgamecriteria + ' which is required to occur required before playing ') 
-    // }
-
     currentbalance = engine.getBalance(); 
     if (verbose == true) { 
         console.log("GAMES ELAPSED: " + gameselapsed); 
@@ -414,7 +406,6 @@ function log_post_game_data(gamedata) {
 
     if (cooldownelapsed >= cooldowncount) { 
         gamemode = 'MARTINGALE'; 
-        console.log('reset to martingale after cooldown'); 
         cooldownelapsed = 0; 
     } else { 
         cooldownelapsed = cooldownelapsed + 1; 
