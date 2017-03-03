@@ -26,13 +26,13 @@
 
 /** VARIABLE DECLARATIONS */ 
 var username = 'beebo' 										// Put your remote username here (to send chat messages to your FALCON bot)
-var startingbet = 6; 										// This is the amount of bits where FALCON bot will start your bet in MARTINGALE and MARTINGALE_HYBRID modes
+var startingbet = 15; 										// This is the amount of bits where FALCON bot will start your bet in MARTINGALE and MARTINGALE_HYBRID modes
 var betincrement = 1.065; 									// This is the amount your bet will increase each turn in MARTINGALE and MARTINGALE_HYBRID modes
 var takeprofitpoint = 1899; 								// This is where you will take profit (1899 means 18.99 in bustabit, as there is no concept of decimals in BaB scripts)
 var takeprofitincrementinterval = 0.9999;					// This is the amount your takeprofitpoint will be increased each turn in MARTINGALE and MARTINGALE_HYBRID modes
 var increasemartingalebase = 1.1; 							// How much to increase the martingale base bet on a successful win (modifies startingbet on each martingale win if the 'increasemartingalebasebetonwin' is set to true) 
 var increasemartingalebasebetonwin = true; 					// When set to true will increase your base bet on a successful martingale win by the amount specified in the 'increasemartingalebase' variable
-var paddingpoint = 0.5;  									// How much to increment the 
+var paddingpoint = 0.75;  									// How much to balance to gurantee 'saved' from absolute and total wreckage. (a value of 0.5 would mean 50% of balance would trigger failsafe)
 var start = engine.getBalance() / 100; 						// Do not touch - variable to save starting balance of FALCON execution
 var curbal = start; 										// Do not touch - variable to save current balance of current FALCON state 
 var cutoffpoint = curbal * paddingpoint; 					// This is the point in which the bot will trigger a failsafe and immediately cease all execution
@@ -190,10 +190,18 @@ function start_game(gamedata) {
                     martingalebet = martingalebet * 1.1; 
                 } 
             }
-            console.log('calling placebet ' + martingalebet + ' with take profit multiplier of ' + martingaletpi); 
-            engine.placeBet(formatbet(martingalebet), martingaletpi, false); 
-            currentbet = martingalebet; 
-	        martingaletpi = 1899; 
+
+            if (randomten % 7 == 0) { 
+            	console.log('RANDOM GAME SKIP & increase bet by 10% next game'); 
+            	martingalebet = martingalebet * 1.1; 
+
+    		} else { 
+	            console.log('calling placebet ' + martingalebet + ' with take profit multiplier of ' + martingaletpi); 
+	            engine.placeBet(formatbet(martingalebet), martingaletpi, false); 
+	            currentbet = martingalebet; 
+		        martingaletpi = 1899; 
+    		}
+
         } 
         // if (martingalewaitcount == gamewaitcount) { 
         //     martingalewaitcount = 0; 
