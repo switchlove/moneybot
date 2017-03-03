@@ -498,7 +498,5 @@ function loadJSON(path, success, error) {
 }
 
 
-if (verbose == true) { 
-    console.log('initial transfer JSON'); 
-    loadJSON('transfer.json', function(data) { console.log(JSON.stringify(data)); }, function(xhr) { console.error(xhr); });
-}
+
+loadJSON('transfer.json', function(data) { console.log(JSON.stringify(data)); }, function(xhr) { console.error(xhr); });
