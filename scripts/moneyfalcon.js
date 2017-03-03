@@ -149,20 +149,24 @@ function start_game(gamedata) {
         gamemode = "MARTINGALE"; 
         currentbet = startingbet; 
     } else if (gamemode == 'MARTINGALE') { 
+
+
+        // if (martingalewaitcount > gamewaitcount) { 
+        //     martingalewaitcount = gamewaitcount;
+        // }
+
         // var themultiplier = 1900; 
-        if (martingalewaitcount >= gamewaitcount) { 
+        if (martingalewaitcount == gamewaitcount || martingalewaitcount == 0) { 
             console.log('starting martingale'); 
             martingaletpi = Math.round(martingaletpi).toFixed(0);         
             martingaletpi = parseInt("" + martingaletpi);        
             console.log('calling placebet ' + martingalebet + ' with take profit multiplier of ' + martingaletpi); 
             engine.placeBet(formatbet(martingalebet), martingaletpi, false); 
             currentbet = martingalebet; 
-        } else { 
-            console.log('Martingale criteria not met - skipping'); 
-        }
-        if (martingalewaitcount >= gamewaitcount) { 
-            martingalewaitcount = 0; 
         } 
+        // if (martingalewaitcount == gamewaitcount) { 
+        //     martingalewaitcount = 0; 
+        // } 
     }
 }
 
@@ -395,13 +399,13 @@ function log_post_game_data(gamedata) {
         console.log("MANUAL PLAY DETECTED DURING COOLDOWN - Last game (" + laststatus + ") does not count toward required cooldown target of " + cooldowncount + ' games.')
     }
     gameselapsed++; 
-    if (gamedata.game_crash < playgamecriteria) { 
-        martingalewaitcount++;
-        console.log("waited for " + martingalewaitcount + ' out of ' + gamewaitcount + ' games below ' + playgamecriteria + ' which is required to occur required before playing ') 
-    } else { 
-        martingalewaitcount = 0; 
-        console.log("waited for " + martingalewaitcount + ' out of ' + gamewaitcount + ' games below ' + playgamecriteria + ' which is required to occur required before playing ') 
-    }
+    // if (gamedata.game_crash < playgamecriteria) { 
+    //     martingalewaitcount++;
+    //     console.log("waited for " + martingalewaitcount + ' out of ' + gamewaitcount + ' games below ' + playgamecriteria + ' which is required to occur required before playing ') 
+    // } else { 
+    //     martingalewaitcount = 0; 
+    //     console.log("waited for " + martingalewaitcount + ' out of ' + gamewaitcount + ' games below ' + playgamecriteria + ' which is required to occur required before playing ') 
+    // }
 
     currentbalance = engine.getBalance(); 
     if (verbose == true) { 
