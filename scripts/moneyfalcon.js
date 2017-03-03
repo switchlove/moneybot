@@ -34,6 +34,8 @@ console.log('START: ' + start);
 var takeprofitpoint = 1899; 
 var gamesplayedcount = 0; 
 var takeprofitincrementinterval = 0.9999;
+var increasemartingalebase = 1.1; 
+var increasemartingalebasebetonwin = true; 
 var paddingpoint = 0.5;  
 var cutoffpoint = curbal * paddingpoint; 
 console.log('CUTOFF POINT IS BALANCE OF ' + cutoffpoint); 
@@ -440,7 +442,14 @@ function log_post_game_data(gamedata) {
         // }
         if (laststatus == 'WON') { 
            console.log('We won the martingale after ' + martingalecount + ' games.'); 
-            martingalebet = startingbet; 
+            if(increasemartingalebasebetonwin == true) { 
+				startingbet = startingbet * increasemartingalebase; 
+				console.log('moved martingale base to ' + startingbet); 
+	            
+            }
+           	martingalebet = startingbet; 
+            cutoffpoint = cutoffpoint * 1.05; 
+            console.log('Increased cutoff point by 5% to ' + cutoffpoint); 
         } else if (laststatus == 'LOST') {
             console.log("we lost the martingale (turn number " + martingalecount + ')'); 
             martingalebet = martingalebet * betincrement; 
