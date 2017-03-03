@@ -26,7 +26,7 @@
 
 /** VARIABLE DECLARATIONS */ 
 var username = 'beebo' 
-var startingbet = 2; 
+var startingbet = 6; 
 var betincrement = 1.065; 
 var takeprofitpoint = 1899; 
 var gamesplayedcount = 0; 
@@ -80,7 +80,7 @@ var usersplaying = [];
 var falconexample = "FALCON mimic abc";
 var mimicbet = 0; 
 var falconregexp = /(?:^|\s)FALCON\s(.*?)\s(.*?)\s(.*)(?:\s|$)/g;
-var gamemode = "MARTINGALE"; 
+var gamemode = "MARTINGALE_HYBRID"; 
 var martingalecount = 0; 
 var martingalebet = startingbet; 
 var martingaletpi = takeprofitpoint; 
@@ -173,14 +173,15 @@ function start_game(gamedata) {
                 }
 
                 if (randomten % 2 == 0) { 
-                    martingalebet = martingalebet * 1.15; 
+                    martingalebet = martingalebet * 1.25; 
                 } else { 
-                    martingalebet = martingalebet * 1.01; 
+                    martingalebet = martingalebet * 1.1; 
                 } 
             }
             console.log('calling placebet ' + martingalebet + ' with take profit multiplier of ' + martingaletpi); 
             engine.placeBet(formatbet(martingalebet), martingaletpi, false); 
             currentbet = martingalebet; 
+	        martingaletpi = 1899; 
         } 
         // if (martingalewaitcount == gamewaitcount) { 
         //     martingalewaitcount = 0; 
@@ -271,7 +272,15 @@ function process_chat_message(gamedata) {
                     engine.chat('[FALCONBOT]: we will bet ' + mimicbet + ' bits and cash out the same time ' + mimicuser +' does next round (or 10x, whatever comes first)... [if ' + mimicuser + ' is not playing in the next round we will pick a user to follow at random]'); 
                 }
 
-            } 
+            } else if (falconcommand == 'set') { 
+            	var nextthing = match[2]; 
+            	if (nextthing == 'basebet') { 
+            		var amount = parseInt(match[3]); 
+            		engine.chat('Set base bet to ' + amount); 
+            		martingalebet = amount; 
+            		currentbet = amount; 
+            	}
+            }
         } else { 
             if (gamedata.message == 'FALCON stop') { 
                 console.log('FALCON is stopping'); 
@@ -298,7 +307,16 @@ function process_chat_message(gamedata) {
             if (gamedata.message == 'FALCON gamecount') { 
                 console.log('FALCON is online'); 
                 gamesplayedcount = numwinners + numlosers; 
-                engine.chat('[FALCONBOT]: Games Played: ' + gamesplayedcount + ' | Games Elapsed: ' + gameselapsed + ' | Games Won: ' + numwinners + ' | Games Lost: ' + numlosers + " | Median: " + historicalmedian); 
+                var profitstatus = ''; 
+                if (grosswinnings - grosslosses > 0) { 
+            		profitstatus = 'NET_POSITIVE';
+                } else if (grosswinnings - grosslosses < 0) {
+                	profitstatus = 'NET_NEGATIVE'; 
+                } else { 
+					profitstatus = 'NEUTRAL_NO_GAIN_NO_LOSS';
+                }
+
+                engine.chat('[FALCONBOT]: Games Played: ' + gamesplayedcount + ' | Games Elapsed: ' + gameselapsed + ' | Games Won: ' + numwinners + ' | Games Lost: ' + numlosers + " | Profitable Status: " + profitstatus); 
             } 
 
             if (gamedata.message == 'FALCON martingale') { 
@@ -306,6 +324,13 @@ function process_chat_message(gamedata) {
                 gamemode = "MARTINGALE"; 
                 engine.chat('[FALCONBOT]: Martingale mode activated - wait criteria of ' + gamewaitcount + ' must be acquired before we begin playing.'); 
             }
+
+
+            // if (gamedata.message == 'FALCON setbasebet') { 
+            //     console.log('Setting game mode to martingale');
+            //     gamemode = "MARTINGALE"; 
+            //     engine.chat('[FALCONBOT]: Martingale mode activated - wait criteria of ' + gamewaitcount + ' must be acquired before we begin playing.'); 
+            // }
 
             if (gamedata.message == 'FALCON martingale immediately') { 
                 gamemode = 'MARTINGALE'; 
@@ -389,7 +414,9 @@ function log_post_game_data(gamedata) {
             // engine.chat('[FALCONBOT] We mimicked ' + targetmimic + ' and failed miserably'); 
         }
     } 
-
+    if (gamemode == 'MARTINGALE_HYBRID' && laststatus == 'WON' && gamedata.crash >= 1899) { 
+            martingalebet = startingbet; 
+    }
     if (gamemode == 'MARTINGALE') { 
         // if (gamedata.game_crash < playgamecriteria) { 
         //     martingalecount = martingalecount + 1; 
