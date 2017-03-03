@@ -461,6 +461,7 @@ function calculate_net_profits() {
 }
 
 function summarize() { 
+    totalprofit = grosswinnings - grosslosses; 
     if (verbose == true) { 
         console.log('============================================'); 
         console.log('==> Starting game... '); 
@@ -474,7 +475,7 @@ function summarize() {
         console.log('============================================'); 
 
     } else { 
-        console.log('starting new game -- wins: ' + numwinners + ' | losses: ' + numlosers + ' | grosswinnings: ' + grosswinnings + ' | grosslosses:' + grosslosses + " | totalprofit: " + totalprofit); 
+        console.log('starting new game -- wins: ' + numwinners + ' | losses: ' + numlosers + ' | grosswinnings: ' + grosswinnings + ' | grosslosses: ' + grosslosses + " | totalprofit: " + totalprofit); 
     }
 
 }

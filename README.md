@@ -3,6 +3,16 @@ Welcome to project moneybot.
 
 [Want to ask **currentsea** a question and get a guranteed response?](https://21.co/currentsea/)
 
+
+### MoneyFalcon
+The MoneyFalcon script has the commands described below available in chat. 
+
+* `FALCON status` - your FALCON bot will print out if it is successfully online with this command
+* `FALCON summary` - get a summary of the statistics since FALCON started (incubating) 
+* `FALCON mimic random <amount>` - mimic a random player for an amount, i.e. `FALCON mimic random 500` would mimic a random player for 500 bits bet 
+* `FALCON mimic <username> <bet>` - mimic a specific user if they are playing otherwise a random user for a given bet 
+
+
 ### Improvements / Additions
 * You are more than welcome to submit your own scripts to this repository.  Please create a pull request and as long as nothing looks completely crazy, i'll pull it into the master branch! 
 * If you would like a script that you don't see in the repository, feel free to *create an issue* describing what your script should do and hopefully someone will make your idea a reality! 
@@ -17,15 +27,6 @@ Welcome to project moneybot.
 * Continued development and improvements on this documentation as well as the scripts is all done via volunteer work free of charge by myself.  If you would like to support this project, **even the smallest donatio
 n is greatly appreciated**.  Donations can be sent to the BTC address shown below (**`172f3hQmGpJrwTBj3wLX56aUFobpvMfpDJ`**). 
 ![172f3hQmGpJrwTBj3wLX56aUFobpvMfpDJ](http://i.imgur.com/rbWqbqN.png)
-
-### MoneyFalcon
-The MoneyFalcon script has the commands described below available in chat. 
-
-* `FALCON status` - your FALCON bot will print out if it is successfully online with this command
-* `FALCON summary` - get a summary of the statistics since FALCON started (incubating) 
-* `FALCON mimic random <amount>` - mimic a random player for an amount, i.e. `FALCON mimic random 500` would mimic a random player for 500 bits bet 
-* `FALCON mimic <username> <bet>` - mimic a specific user if they are playing otherwise a random user for a given bet 
-
 
 ### License & Copyright 
 
