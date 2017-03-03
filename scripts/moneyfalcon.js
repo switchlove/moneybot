@@ -53,19 +53,16 @@ var martingalewaitcount = 0;
 var gamehistory = [];  
 var gameresults = []; 
 var historicalmedian = 197; 
-// console.log('starting median: ' + historicalmedian); 
 var currentbet = startingbet; 								// Do not touch
 var grosswinnings = 0; 
 var grosslosses = 0; 
 var numwinners = 0; 
 var numlosers = 0; 
 var numskipped = 0; 
-var netprofits = 0; 
+var netprofits = 0; 							
 var totalprofit = 0; 
 var losingsteak = 0; 
-var paperbetting = 0; 
-var moneybotlength = 0; 
-var moneybotconfirmations = 0;
+var randomten = Math.floor((Math.random() * 10) + 1); 		// Do not touch
 var gameselapsed = 0; 
 var verbose = false; 
 var state = 0; 
@@ -78,10 +75,9 @@ var startingbalance = engine.getBalance();
 var currentbalance = startingbalance; 
 var pregamebalance = currentbalance; 
 var laststatus = engine.lastGamePlay(); 
-var targetmimic = 'MountainDew'; 
+var targetmimic = 'beebo'; 
 var startgamerecords = []; 
 var usersplaying = []; 
-var falconexample = "FALCON mimic abc";
 var mimicbet = 0; 
 var falconregexp = /(?:^|\s)FALCON\s(.*?)\s(.*?)\s(.*)(?:\s|$)/g;
 var martingalecount = 0; 
@@ -153,7 +149,9 @@ function start_game(gamedata) {
     } else if (gamemode == 'MARTINGALE' || gamemode == 'MARTINGALE_HYBRID') { 
         console.log('starting martingale'); 
         martingaletpi = Math.round(martingaletpi).toFixed(0);         
-        martingaletpi = parseInt("" + martingaletpi);        
+        martingaletpi = parseInt("" + martingaletpi);       
+        randomten = Math.floor((Math.random() * 10) + 1); // do not touch
+ 
         if (randomten % 7 == 0) { 
         	console.log('RANDOM GAME SKIP & increase bet by 10% next game'); 
         	martingalebet = martingalebet * 1.1; 
