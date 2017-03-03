@@ -75,7 +75,7 @@ var currentbalance = startingbalance;
 var pregamebalance = currentbalance; 
 var laststatus = engine.lastGamePlay(); 
 var targetmimic = 'MountainDew'; 
-var curgamerecord = {}; 
+var startgamerecords = []; 
 var usersplaying = []; 
 var falconexample = "FALCON mimic abc";
 var mimicbet = 0; 
@@ -186,7 +186,7 @@ function play_game(gamedata) {
         console.log('game #' + gameselapsed); 
     } 
 
-    curgamerecord = gamedata; 
+    startgamerecords.push(gamedata); 
 
     for (var currentuser in gamedata) { 
         usersplaying.push(currentuser.username); 
@@ -257,6 +257,7 @@ function process_chat_message(gamedata) {
 
             if (gamedata.message == 'FALCON summary') { 
                 engine.chat('Size of game history record: ' + gamehistory.length); 
+                console.log(JSON.stringify(startgamerecords)); 
                 console.log(JSON.stringify(gamehistory)); 
             }
 
@@ -337,7 +338,7 @@ function log_post_game_data(gamedata) {
     if (gameresultstatus == 'WON') { 
         numwinners++; 
         gamesplayedcount++; 
-        var baldiff = engine.getBalance() - pregamebalance; 
+        var baldiff = (engine.getBalance() / 100) - pregamebalance; 
         grosswinnings += baldiff; 
     } else if (gameresultstatus == 'LOST') { 
         numlosers++; 
