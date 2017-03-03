@@ -25,10 +25,12 @@
 /* END LICENSE */ 
 
 /** VARIABLE DECLARATIONS */ 
-var username = 'beebo' 
+var username = 'beebo'  // Falcon Master's username 
+var botusername = 'moneyfalcon' // The bot's username
 var startingbet = 2; 
 var betincrement = 1.065; 
 var takeprofitpoint = 1899; 
+var lastmartingale = 0; 
 var gamesplayedcount = 0; 
 var takeprofitincrementinterval = 0.9999; 
 var playgamecriteria = 1866; 
@@ -70,6 +72,7 @@ var cooldowncount = 3;
 var winrate = 0;
 var chatbet = false; 
 var mimic = false; 
+var shibamessage = "!bust 19"; 
 var startingbalance = engine.getBalance(); 
 var currentbalance = startingbalance; 
 var pregamebalance = currentbalance; 
@@ -89,6 +92,8 @@ var breakpoints = [216, 139, 190, 143, 162, 239, 143, 228, 217, 200, 179, 201, 2
 var randombreakpointindex = Math.floor((Math.random() * breakpoints.length) + 1);
 var xhr = new XMLHttpRequest();
 
+var ex = "Seen 19.76 in #3728078. 49 games ago (18m 18s)"
+
 
 /** BEGIN ENGINE INSTRUCTIONS */ 
 engine.on('game_starting', start_game); 
@@ -104,6 +109,13 @@ engine.on('cashed_out', cashout);
 engine.on('connected', script_connected); 
 
 engine.on('disconnected', script_disconnected); 
+
+
+
+// engine.on('msg', determineLastMartingale); 
+
+// determineLastMartingale(); 
+engine.chat(shibamessage); 
 
 engine.on('msg', process_chat_message); 
 /** END ENGINE INSTRUCTIONS */ 
@@ -244,6 +256,24 @@ function process_player_bet(gamedata) {
 }
 
 function process_chat_message(gamedata) { 
+
+    // if (gamedata.message == shibamessage && gamedata.username == botusername) { 
+
+    // }
+    var exregex = /(?:^|\s)Seen\s(.*?)\sin\s#(.*?).\s(.*?)\sgames\sago(.*?)/g;
+    var regresult = exregex.exec(gamedata.message); 
+    console.log(regresult[0]); 
+    // if (gamedata.username == 'shiba' && parseFloat(regresult[0]) >= 19.0) { 
+    //     console.log(regresult); 
+    //     console.log(parseFloat(regresult[3]));
+    //     lastmartingale = regresult[3]; 
+    //     console.log("Last martingale was: " + lastmartingale + " games ago"); 
+    // }
+
+    // var stringtest = 'Seen 45.54 in #3728133. 1 games ago (1m 25s)'
+
+
+
     if (verbose == true) { 
         console.log('--------- CHAT MESSAGE BELOW -----------'); 
         console.log(JSON.stringify(gamedata)); 
@@ -520,6 +550,9 @@ function loadJSON(path, success, error) {
     xhr.send();
 }
 
+// function determineLastMartingale() { 
+
+// }
 
 if (verbose == true) { 
     loadJSON('transfer.json', function(data) { console.log(JSON.stringify(data)); }, function(xhr) { console.error(xhr); });
