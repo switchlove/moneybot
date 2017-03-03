@@ -159,9 +159,10 @@ function start_game(gamedata) {
         } else { 
             console.log('Martingale criteria not met - skipping'); 
         }
-
+        if (martingalewaitcount >= gamewaitcount) { 
+            martingalewaitcount = 0; 
+        } 
     }
-
 }
 
 function formatbet(betamount) { 
