@@ -36,7 +36,10 @@ var paddingpoint = 0.75;  									// How much to balance to gurantee 'saved' fr
 var start = engine.getBalance() / 100; 						// Do not touch - variable to save starting balance of FALCON execution
 var curbal = start; 										// Do not touch - variable to save current balance of current FALCON state 
 var cutoffpoint = curbal * paddingpoint; 					// This is the point in which the bot will trigger a failsafe and immediately cease all execution
-
+var cutoffincrease = 0.05; 									// This will increase the cutoff point by this % of your profits (0.05 would be 5% of profits gained as the amount to raise the cutoffpoint)
+var maxwinninggames = 33; 									// Maximum # of Winning Games before the bot will stop automatically (0 for infinity)
+var maxlosinggames = 33;									// Maximum # of Losing games before the bot will stop automatically (0 for infinity)
+var gamemode = "MARTINGALE"; 					            // Choices (currently supported): MARTINGALE, MARTINGALE_HYBRID (incubating)
 console.log('STARTING BASE BET: ' + start); 			    // This will log the starting base bet to the console upon the scripts initial execution
 console.log('CUTOFF POINT IS BALANCE OF ' + cutoffpoint); 	// This will log the cutoff threshold for the bot to trigger the failsafe mechanism to the console upon initial execution
 
@@ -46,23 +49,12 @@ var gamesplayedcount = 0;
 var playgamecriteria = 1866; 
 var gamewaitcount = 5; 
 var martingalewaitcount = 0; 
-var moneybot = 0; 
-var medianupper = 1.96; 
-var maxwinninggames = 33; 
-var maxlosinggames = 33; 
-var resetlosscountonwin = false; 
-var winningstreakbetincrement = 1; 
-var abortwhenmedianfails = 0; 
-var abortonfailedentrycriteria = 0; 
-var botpriority = 1;    
-var bethistory = []; 
+ 
 var gamehistory = [];  
 var gameresults = []; 
 var historicalmedian = 197; 
-console.log('starting median: ' + historicalmedian); 
-var currentbet = startingbet; 
-var multiplier = takeprofitpoint;
-var triggeredbusts = 0; 
+// console.log('starting median: ' + historicalmedian); 
+var currentbet = startingbet; 								// Do not touch
 var grosswinnings = 0; 
 var grosslosses = 0; 
 var numwinners = 0; 
@@ -92,7 +84,6 @@ var usersplaying = [];
 var falconexample = "FALCON mimic abc";
 var mimicbet = 0; 
 var falconregexp = /(?:^|\s)FALCON\s(.*?)\s(.*?)\s(.*)(?:\s|$)/g;
-var gamemode = "MARTINGALE_HYBRID"; 
 var martingalecount = 0; 
 var martingalebet = startingbet; 
 var martingaletpi = takeprofitpoint; 
@@ -144,15 +135,12 @@ function start_game(gamedata) {
     console.log("game # " + gameselapsed + " is starting..."); 
     calculate_win_rate(); 
     summarize(); 
-    pregamebalance = engine.getBalance(); 
-
-
+    pregamebalance = engine.getBalance();
     console.log('balance before game #' + gameselapsed + ': ' + pregamebalance); 
     if (gamemode == 'NOT_SPECIFIED') { 
         console.log('No game mode specified - not playing'); 
     } else if (gamemode == 'COOLDOWN') { 
         console.log('Cooldown mode enabled - not playing for 3 consecutive rounds (elapsed games: ' + cooldownelapsed + ' / ' + cooldowncount + ')')
-        // cooldowncount++; 
     } else if (gamemode == 'MIMIC') { 
         console.log('game mode is MIMIC'); 
         console.log('mimic user is ' + targetmimic); 
@@ -163,49 +151,34 @@ function start_game(gamedata) {
         gamemode = "MARTINGALE"; 
         currentbet = startingbet; 
     } else if (gamemode == 'MARTINGALE' || gamemode == 'MARTINGALE_HYBRID') { 
-
-
-        // if (martingalewaitcount > gamewaitcount) { 
-        //     martingalewaitcount = gamewaitcount;
-        // }
-
-        // var themultiplier = 1900; 
-        if (martingalewaitcount == gamewaitcount || martingalewaitcount == 0) { 
-            console.log('starting martingale'); 
-            martingaletpi = Math.round(martingaletpi).toFixed(0);         
-            martingaletpi = parseInt("" + martingaletpi);        
-
-            if (gamemode == 'MARTINGALE_HYBRID') { 
-                var randomten = Math.floor((Math.random() * breakpoints.length) + 1);
-                if (randomten % 4 == 0) { 
-                    randombreakpointindex = Math.floor((Math.random() * breakpoints.length) + 1);
-                    martingaletpi = breakpoints[randombreakpointindex]
-                    // martingaletpi = Math.round(martingaletpi).toFixed(0);       
-                    console.log('Using hybrid martingale TPI');   
-                }
-
-                if (randomten % 2 == 0) { 
-                    martingalebet = martingalebet * 1.25; 
-                } else { 
-                    martingalebet = martingalebet * 1.1; 
-                } 
+        console.log('starting martingale'); 
+        martingaletpi = Math.round(martingaletpi).toFixed(0);         
+        martingaletpi = parseInt("" + martingaletpi);        
+        if (gamemode == 'MARTINGALE_HYBRID') { 
+            var randomten = Math.floor((Math.random() * breakpoints.length) + 1);
+            if (randomten % 4 == 0) { 
+                randombreakpointindex = Math.floor((Math.random() * breakpoints.length) + 1);
+                martingaletpi = breakpoints[randombreakpointindex]
+                console.log('Using hybrid martingale TPI');   
             }
 
-            if (randomten % 7 == 0) { 
-            	console.log('RANDOM GAME SKIP & increase bet by 10% next game'); 
-            	martingalebet = martingalebet * 1.1; 
+            if (randomten % 2 == 0) { 
+                martingalebet = martingalebet * 1.25; 
+            } else { 
+                martingalebet = martingalebet * 1.1; 
+            } 
+        }
 
-    		} else { 
-	            console.log('calling placebet ' + martingalebet + ' with take profit multiplier of ' + martingaletpi); 
-	            engine.placeBet(formatbet(martingalebet), martingaletpi, false); 
-	            currentbet = martingalebet; 
-		        martingaletpi = 1899; 
-    		}
+        if (randomten % 7 == 0) { 
+        	console.log('RANDOM GAME SKIP & increase bet by 10% next game'); 
+        	martingalebet = martingalebet * 1.1; 
 
-        } 
-        // if (martingalewaitcount == gamewaitcount) { 
-        //     martingalewaitcount = 0; 
-        // } 
+		} else { 
+            console.log('calling placebet ' + martingalebet + ' with take profit multiplier of ' + martingaletpi); 
+            engine.placeBet(formatbet(martingalebet), martingaletpi, false); 
+            currentbet = martingalebet; 
+	        martingaletpi = 1899; 
+		}
     }
 }
 
@@ -460,7 +433,7 @@ function log_post_game_data(gamedata) {
 
             }
            	martingalebet = startingbet; 
-            cutoffpoint = cutoffpoint * 1.05; 
+            cutoffpoint = cutoffpoint + (cutoffpoint * cutoffincrease); 
             console.log('Increased cutoff point by 5% to ' + cutoffpoint); 
         } else if (laststatus == 'LOST') {
             console.log("we lost the martingale (turn number " + martingalecount + ')'); 
@@ -494,6 +467,17 @@ function log_post_game_data(gamedata) {
     } else { 
         cooldownelapsed = cooldownelapsed + 1; 
     }
+
+    if (numlosers >= maxlosinggames && maxlosinggames > 0) { 
+    	console.log('Max # of losing games reached. Stopping'); 
+    	engine.stop()
+    } 
+    if (numwinners >= maxwinninggames && maxwinninggames > 0) { 
+    	console.log('Max # of losing games reached. Stopping'); 
+    	engine.stop(); 
+	}
+
+
 } 
 
 function log_cashout_data(gamedata) { 
