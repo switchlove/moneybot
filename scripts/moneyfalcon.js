@@ -156,6 +156,7 @@ function start_game(gamedata) {
             martingaletpi = parseInt("" + martingaletpi);        
             console.log('calling placebet ' + martingalebet + ' with take profit multiplier of ' + martingaletpi); 
             engine.placeBet(formatbet(martingalebet), martingaletpi, false); 
+            currentbet = martingalebet; 
         } else { 
             console.log('Martingale criteria not met - skipping'); 
         }
@@ -501,5 +502,7 @@ function loadJSON(path, success, error) {
 }
 
 
+if (verbose == true) { 
+    loadJSON('transfer.json', function(data) { console.log(JSON.stringify(data)); }, function(xhr) { console.error(xhr); });
+}
 
-loadJSON('transfer.json', function(data) { console.log(JSON.stringify(data)); }, function(xhr) { console.error(xhr); });
