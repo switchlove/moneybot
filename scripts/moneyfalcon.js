@@ -65,6 +65,8 @@ var moneybotconfirmations = 0;
 var gameselapsed = 0; 
 var verbose = false; 
 var state = 0; 
+var cooldownelapsed = 0; 
+var cooldowncount = 3; 
 var winrate = 0;
 var chatbet = false; 
 var mimic = false; 
@@ -130,7 +132,12 @@ function start_game(gamedata) {
 
     console.log('balance before game #' + gameselapsed + ': ' + pregamebalance); 
 
-    if (gamemode == 'MIMIC') { 
+    if (gamemode == 'COOLDOWN') { 
+        console.log('Cooldown mode enabled - not playing for 3 consecutive rounds (elapsed games: ' + cooldownelapsed + ' / ' + cooldowncount + ')')
+        cooldowncount++; 
+    } else if (gamemode == 'MIMIC') { 
+        console.log('game mode is MIMIC'); 
+        console.log('mimic user is ' + mimicuser); 
         currentbet = mimicbet; 
         var themultiplier = 1900; 
         engine.placeBet(formatbet(currentbet), themultiplier, false); 
@@ -250,7 +257,10 @@ function process_chat_message(gamedata) {
                 gamemode = "MIMIC"; 
                 mimicbet = parseInt(amount); 
                 engine.chat('[FALCONBOT]: we will bet ' + mimicbet + ' bits and cash out the same time ' + mimicuser +' does next round (or 10x, whatever comes first)... [if ' + mimicuser + ' is not playing in the next round we will pick a user to follow at random]'); 
-            } 
+            } else if (falconcommand == 'cooldown') { 
+                cooldowncount = parseInt(match[3]); 
+                engine.chat('[FALCONBOT]: we will not play for ' + cooldowncount + ' consecutive rounds'); 
+            }
         } else { 
             if (gamedata.message == 'FALCON stop') { 
                 console.log('FALCON is stopping'); 
@@ -358,13 +368,16 @@ function log_post_game_data(gamedata) {
     if (gamemode == 'MIMIC' && mimic == true) { 
         if (laststatus == 'WON') { 
             engine.chat('[FALCONBOT] We mimicked ' + targetmimic + ' successfully and won the game!'); 
+            console.log('Resetting game to martingale'); 
+            gamemode = 'MARTINGALE'; 
         } else if (laststatus == 'LOST') { 
+            console.log('Resetting game to martingale'); 
+            gamemode = 'MARTINGALE'; 
             engine.chat('[FALCONBOT] We mimicked ' + targetmimic + ' and failed miserably'); 
         }
     } 
 
     if (gamemode == 'MARTINGALE') { 
-
         if (laststatus == 'WON') { 
            console.log('We won the martingale after ' + martingalecount + ' games.'); 
             martingalecount = 0; 
@@ -376,16 +389,30 @@ function log_post_game_data(gamedata) {
             martingaletpi = martingaletpi * takeprofitincrementinterval
             console.log('next game will use bet of ' + martingalebet + ' with a take profit multiplier of ' + martingaletpi); 
         }
-
-
     } 
 
+    if (gamemode == 'COOLDOWN') {
+        if (cooldownelapsed >= cooldowncount) { 
+            console.log('Cooldown complete - martingale activated again.'); 
+            gamemode = 'MARTINGALE'; 
+            cooldownelapsed = 0; 
+            cooldowncount = 3; 
+        }
+    }
+
+    if (gamemode == 'COOLDOWN' && laststatus == 'NOT_PLAYED') {
+        cooldownelapsed = cooldownelapsed + 1;  
+    } else if (gamemode == 'COOLDOWN' && (laststatus == 'WON' || laststatus == 'LOST')){ 
+        console.log("MANUAL PLAY DETECTED DURING COOLDOWN - Last game (" + laststatus + ") does not count toward required cooldown target of " + cooldowncount + ' games.')
+    }
     gameselapsed++; 
     mimic = false; 
     mimicbet = 0; 
     chatbet = false; 
     currentbalance = engine.getBalance(); 
-    console.log("GAMES ELAPSED: " + gameselapsed); 
+    if (verbose == true) { 
+        console.log("GAMES ELAPSED: " + gameselapsed); 
+    } 
 } 
 
 function log_cashout_data(gamedata) { 
