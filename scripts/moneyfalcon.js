@@ -28,9 +28,15 @@
 var username = 'beebo' 
 var startingbet = 6; 
 var betincrement = 1.065; 
+var start = engine.getBalance() / 100; 
+var curbal = start; 
+console.log('START: ' + start); 
 var takeprofitpoint = 1899; 
 var gamesplayedcount = 0; 
-var takeprofitincrementinterval = 0.9999; 
+var takeprofitincrementinterval = 0.9999;
+var paddingpoint = 0.5;  
+var cutoffpoint = curbal * paddingpoint; 
+console.log('CUTOFF POINT IS BALANCE OF ' + cutoffpoint); 
 var playgamecriteria = 1866; 
 var gamewaitcount = 5; 
 var martingalewaitcount = 0; 
@@ -373,6 +379,12 @@ function finish_game(gamedata) {
     console.log("Game is finished"); 
     console.log(gamedata); 
     log_post_game_data(gamedata); 
+    curbal = engine.getBalance() / 100; 
+    if (cutoffpoint > curbal) { 
+    	console.log("FAILSAFE TRIGGERED: balance is < cutoffpoint"); 
+    	engine.stop(); 
+    	summarize_history(gamedata); 
+    } 
 }
 
 function log_pre_game_data(gamedata) { 
