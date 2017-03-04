@@ -11,7 +11,7 @@ The MoneyFalcon script has the commands described below available in chat.
 * `FALCON summary` - get a summary of the statistics since FALCON started (incubating) 
 * `FALCON mimic random <amount>` - mimic a random player for an amount, i.e. `FALCON mimic random 500` would mimic a random player for 500 bits bet 
 * `FALCON mimic <username> <bet>` - mimic a specific user if they are playing otherwise a random user for a given bet 
-
+* `FALCON martingale reset` - resets the martingale streak to the original basebet 
 
 ### Improvements / Additions
 * You are more than welcome to submit your own scripts to this repository.  Please create a pull request and as long as nothing looks completely crazy, i'll pull it into the master branch! 
