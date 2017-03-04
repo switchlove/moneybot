@@ -1,6 +1,4 @@
-// MoneyBot 3.0 - moneybot3.js
-// Authors: Joe 'currentsea' Bull & Martin Markowski 
-// https://github.com/currentsea/moneybot 
+// moneyfalcon.js
 
 /* BEGIN LICENSE */ 
 // Copyright (c) 2017 Joseph 'currentsea' Bull
@@ -23,6 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 /* END LICENSE */ 
+
+// FOR THE LATEST VERSION OF THIS SCRIPT, VISIT https://github.com/currentsea/moneybot/releases
+// ==> SEND DONATIONS TO SUPPORT FUTURE DEVELOPMENT: 1AVoq4UTbJS42cUq85WN7yRQHoxHtxKA7m
 
 /** VARIABLE DECLARATIONS */ 
 var username = 'beebo' 										// Put your remote username here (to send chat messages to your FALCON bot)
