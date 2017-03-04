@@ -26,7 +26,7 @@
 
 /** VARIABLE DECLARATIONS */ 
 var username = 'beebo' 										// Put your remote username here (to send chat messages to your FALCON bot)
-var startingbet = 15; 										// This is the amount of bits where FALCON bot will start your bet in MARTINGALE and MARTINGALE_HYBRID modes
+var startingbet = 1; 										// This is the amount of bits where FALCON bot will start your bet in MARTINGALE and MARTINGALE_HYBRID modes
 var betincrement = 1.065; 									// This is the amount your bet will increase each turn in MARTINGALE and MARTINGALE_HYBRID modes
 var takeprofitpoint = 1899; 								// This is where you will take profit (1899 means 18.99 in bustabit, as there is no concept of decimals in BaB scripts)
 var takeprofitincrementinterval = 0.9999;					// This is the amount your takeprofitpoint will be increased each turn in MARTINGALE and MARTINGALE_HYBRID modes
@@ -36,9 +36,9 @@ var paddingpoint = 0.75;  									// How much to balance to gurantee 'saved' fr
 var start = engine.getBalance() / 100; 						// Do not touch - variable to save starting balance of FALCON execution
 var curbal = start; 										// Do not touch - variable to save current balance of current FALCON state 
 var cutoffpoint = curbal * paddingpoint; 					// This is the point in which the bot will trigger a failsafe and immediately cease all execution
-var cutoffincrease = 0.05; 									// This will increase the cutoff point by this % of your profits (0.05 would be 5% of profits gained as the amount to raise the cutoffpoint)
+var cutoffincrease = 0.01; 									// This will increase the cutoff point by this % of your profits (0.05 would be 5% of profits gained as the amount to raise the cutoffpoint)
 var maxwinninggames = 33; 									// Maximum # of Winning Games before the bot will stop automatically (0 for infinity)
-var maxlosinggames = 33;									// Maximum # of Losing games before the bot will stop automatically (0 for infinity)
+var maxlosinggames = 180;									// Maximum # of Losing games before the bot will stop automatically (0 for infinity)
 var gamemode = "MARTINGALE"; 					            // Choices (currently supported): MARTINGALE, MARTINGALE_HYBRID (incubating)
 console.log('STARTING BASE BET: ' + start); 			    // This will log the starting base bet to the console upon the scripts initial execution
 console.log('CUTOFF POINT IS BALANCE OF ' + cutoffpoint); 	// This will log the cutoff threshold for the bot to trigger the failsafe mechanism to the console upon initial execution
