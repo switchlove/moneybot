@@ -27,8 +27,12 @@
 
 /** VARIABLE DECLARATIONS */ 
 var username = 'beebo' 										// Put your remote username here (to send chat messages to your FALCON bot)
-var startingbet = 1; 										// This is the amount of bits where FALCON bot will start your bet in MARTINGALE and MARTINGALE_HYBRID modes
+var startingbet = 50; 										// This is the amount of bits where FALCON bot will start your bet in MARTINGALE and MARTINGALE_HYBRID modes
 var betincrement = 1.065; 									// This is the amount your bet will increase each turn in MARTINGALE and MARTINGALE_HYBRID modes
+var recovertpi = 0.06; 
+var rightsidetpi = 233; 
+var emergencytpi = 0.095; 
+var emergencymultiplier = 125; 										
 var takeprofitpoint = 1899; 								// This is where you will take profit (1899 means 18.99 in bustabit, as there is no concept of decimals in BaB scripts)
 var takeprofitincrementinterval = 0.9998;					// This is the amount your takeprofitpoint will be increased each turn in MARTINGALE and MARTINGALE_HYBRID modes
 var increasemartingalebase = 1.2; 							// How much to increase the martingale base bet on a successful win (modifies startingbet on each martingale win if the 'increasemartingalebasebetonwin' is set to true) 
@@ -140,10 +144,16 @@ function start_game(gamedata) {
     pregamebalance = engine.getBalance();
     randomten = Math.floor((Math.random() * 10) + 1); // do not touch
 
+    if (randomten % 8 == 0) { 
+        var lebet = (engine.getBalance() / 100) * emergencytpi;
+        var tpi =  emergencymultiplier; 
+        console.log('calling placebet ' + lebet + ' with take profit multiplier of ' + tpi); 
+        engine.placeBet(formatbet(lebet), tpi, false); 
+        currentbet = lebet; 
 
-    if (randomten % 3 == 0) { 
-        var lebet = (engine.getBalance() / 100) * 0.05;
-        var tpi =  200; 
+    }  else if (randomten % 9 == 0 || randomten % 7 == 0) { 
+        var lebet = (engine.getBalance() / 100) * recovertpi;
+        var tpi =  rightsidetpi; 
         console.log('calling placebet ' + lebet + ' with take profit multiplier of ' + tpi); 
         engine.placeBet(formatbet(lebet), tpi, false); 
         currentbet = lebet; 
