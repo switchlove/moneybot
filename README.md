@@ -7,6 +7,8 @@ Welcome to project moneybot.
 ### MoneyFalcon
 The MoneyFalcon script has the commands described below available in chat. 
 
+**YOU MUST BE IN THE SPAM CHANNEL FOR THE BOT CHAT TO WORK**
+
 * `FALCON status` - your FALCON bot will print out if it is successfully online with this command
 * `FALCON summary` - get a summary of the statistics since FALCON started (incubating) 
 * `FALCON mimic random <amount>` - mimic a random player for an amount, i.e. `FALCON mimic random 500` would mimic a random player for 500 bits bet 
