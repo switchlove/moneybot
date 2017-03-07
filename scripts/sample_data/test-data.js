@@ -23,17 +23,18 @@ for (var thing in game_history_record) {
 		var gamecrashedat = parseFloat(game_history_record[thing]['post_game_data']['game_crash'] / 100.0); 
 		playerbet = playerbet / 100; 
 		if (player_record[player] == undefined) { 
+			console.log('creating player record ' + player);
 			player_record[player] = {}; 
-			player_record[player]['wincount'] = 0;
-			player_record[player]['losscount'] = 0; 
-			player_record[player]['total_wagered'] = playerbet; 
-			player_record[player]['total_profit_loss'] = 0; 
 			player_record[player]['cashout_crash_differences'] = []; 
 			player_record[player]['cashout_points'] = []; 
+			player_record[player]['profit_loss'] = 0;
+			player_record[player]['wincount'] = 0; 
 
-		} else { 
-			player_record[player]['total_wagered'] += player_record[player]['total_wagered'] + playerbet; 
-		}
+			player_record[player]['losscount'] = 0; 
+
+		} 
+		player_record[player]['total_wagered'] += player_record[player]['total_wagered'] + playerbet; 
+		
 
 		if (playerstoppedat == undefined) { 
 			player_record[player]['cashout_crash_differences'].push(0); 
@@ -45,22 +46,22 @@ for (var thing in game_history_record) {
 				biggestloser = player; 
 				biggestloss = playerbet * -1; 
 			}
-			player_record[player]['wincount'] = player_record[player]['wincount'] + 1;
+			player_record[player]['losscount'] = player_record[player]['losscount'] + 1;
 			player_record[player]['total_profit_loss'] -= player_record[player]['total_profit_loss'] - playerbet; 
 
 		} else { 
 			var playerbonus = game_history_record[thing]['post_game_data']['bonuses'][player]; 
-			var playerstoppedat = parseFloat(game_history_record[thing]['live_game_data'][player]['stopped_at'] / 100.0); 
+			var playerstoppedat = game_history_record[thing]['live_game_data'][player]['stopped_at'] / 100.0; 
 			var playerwonwithoutbonus = playerbet * playerstoppedat; 
 			var cumulativeplayerwinnings = playerwonwithoutbonus + playerbonus; 
-			player_record[player]['total_profit_loss']['profit_loss'] = cumulativeplayerwinnings; 
+			player_record[player]['total_profit_loss'] = cumulativeplayerwinnings; 
 			// console.log(player + ' won the game with a bet of ' + playerbet + 'bits and cashed at ' + playerstoppedat + 'x and won a total of ' + Math.round(cumulativeplayerwinnings).toFixed(0) + ' bits with a ' + playerbonus + 'bits bonus.'); 
 			gamewinners.push(player); 
 			if (biggestwinner == '' || cumulativeplayerwinnings > biggestwin) { 
 				biggestwinner = player; 
 				biggestwin = cumulativeplayerwinnings; 
 			} 
-			player_record[player]['losscount'] = player_record[player]['losscount'] + 1;
+			player_record[player]['wincount'] = player_record[player]['wincount'] + 1;
 			var test = player_record[player]['total_profit_loss']  + cumulativeplayerwinnings; 
 			if (test == undefined) { 
 				console.log('UNDEFINED -'); 
@@ -77,9 +78,9 @@ for (var thing in game_history_record) {
 	console.log(); 
 	console.log('--- POST GAME DATA ---'); 
 	console.log(); 	
-	console.log(JSON.stringify(game_history_record[thing]['post_game_data'])); 
+	// console.log(JSON.stringify(game_history_record[thing]['post_game_data'])); 
 	console.log('===ENDGAME==='); 
-	console.log(JSON.stringify(player_record)); 
+	// console.log(JSON.stringify(player_record)); 
 
 	// console.log(JSON.stringify(game_history_record[thing])); 
 }
@@ -88,15 +89,25 @@ for (var thing in game_history_record) {
 var biggestwincount = 0; 
 var biggestwinner = ''; 
 var biggestwinnerdict = {}; 
+var maxpl = 0; 
+var biggestwinnercountplayer = ''; 
 for (var player in player_record) { 
-	var playerwincount = parseInt(player_record[player]['wincount']); 
+	var playerwincount = player_record[player]['wincount']; 
+
+	var playerpl = player_record[player]['total_profit_loss']; 
+
+	if (playerpl > maxpl) { 
+		maxpl = playerpl;
+		biggestwinner = player; 
+	}
+	console.log(player + ' win count is ' + playerwincount + ' biggestwin count is ' + biggestwincount); 
 	if (playerwincount > biggestwincount) { 
 		biggestwincount = playerwincount; 
-		biggestwinner = player; 
+		// biggestwinner = player; 
 		biggestwinnerdict['winner'] = player; 
 		biggestwinnerdict['count'] = playerwincount; 
 		console.log(player + '(' + biggestwincount + ' wins)'); 
-		// biggestwinner = player; 
+		biggestwinnercountplayer = player; 
 	}	
 	// if (playerwincount > biggestwincount) { 
 	// 	biggestwincount = playerwincount; 
@@ -105,9 +116,11 @@ for (var player in player_record) {
 } 
 console.log(biggestwinnerdict); 
 
-
-console.log('BIGGEST WINNER IS: ' + biggestwinner + ' WITH ' + biggestwincount + ' WINS'); 
-console.log(player_record[biggestwinner]); 
+console.log('---'); 
+console.log('BIGGEST WINNER IS: ' + biggestwinner + ' WITH ' + maxpl + ' profit'); 
+console.log('MOST WINS IS: ' + biggestwinnercountplayer + ' WITH ' + biggestwincount + ' wins'); 
+console.log('---'); 
+// console.log(player_record['60lebanon']); 
 
 /** UTILITY FUNCTIONS **/
 function format_bet(bet_amount) { 
