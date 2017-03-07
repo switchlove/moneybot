@@ -85,10 +85,12 @@ var targetmimic = 'beebo';
 var startgamerecords = []; 
 var usersplaying = []; 
 var mimicbet = 0; 
+var consecalternatelosses = 0; 
 var falconregexp = /(?:^|\s)FALCON\s(.*?)\s(.*?)\s(.*)(?:\s|$)/g;
 
 var falconchatregex = /(?:^|\s)(!f|FALCON)\s(status|stop|pause|start|summary|mimic|recovery)/g; 
 
+var playedalternate = false; 
 
 var martingalecount = 0; 
 var martingalebet = startingbet; 
@@ -147,10 +149,14 @@ function start_game(gamedata) {
     var otherrandom = Math.floor((Math.random() * 10) + 1); // do not touch
     if (randomten % 8 == 0 || otherrandom == 3) {
         var lebet = (engine.getBalance() / 100) * emergencytpi;
+        if (consecalternatelosses > 0) { 
+			lebet = lebet * consecalternatelosses; 
+        } 
         var tpi =  emergencymultiplier; 
         console.log('calling placebet ' + lebet + ' with take profit multiplier of ' + tpi); 
         engine.placeBet(formatbet(lebet), tpi, false); 
         currentbet = lebet; 
+        playedalternate = true; 
 
     }  else if (randomten % 9 == 0) {
         var lebet = (engine.getBalance() / 100) * recovertpi;
@@ -158,7 +164,7 @@ function start_game(gamedata) {
         console.log('calling placebet ' + lebet + ' with take profit multiplier of ' + tpi); 
         engine.placeBet(formatbet(lebet), tpi, false); 
         currentbet = lebet; 
-
+        playedalternate = true; 
     } else { 
 	    console.log('balance before game #' + gameselapsed + ': ' + pregamebalance); 
 	    if (gamemode == 'NOT_SPECIFIED') { 
@@ -419,6 +425,7 @@ function log_post_game_data(gamedata) {
         var baldiff = (engine.getBalance() / 100) - (pregamebalance / 100); 
         grosswinnings += baldiff; 
     } else if (gameresultstatus == 'LOST') { 
+
         numlosers++; 
         gamesplayedcount++; 
         grosslosses += currentbet; 
@@ -456,6 +463,9 @@ function log_post_game_data(gamedata) {
 				console.log('moved martingale base to ' + startingbet); 
 
             }
+            if (playedalternate == true) { 		
+				consecalternatelosses = 0l 
+            }
            	martingalebet = startingbet; 
             cutoffpoint = cutoffpoint + (cutoffpoint * cutoffincrease); 
             console.log('Increased cutoff point by 5% to ' + cutoffpoint); 
@@ -463,8 +473,12 @@ function log_post_game_data(gamedata) {
             martingaleplayedcount = 0; 
         } else if (laststatus == 'LOST') {
             console.log("we lost the martingale (turn number " + martingalecount + ')'); 
-            martingalebet = martingalebet * betincrement; 
-            martingaletpi = martingaletpi * takeprofitincrementinterval
+            if (playedalternate == true) { 
+        		consecalternatelosses++; 
+            } else { 
+	            martingalebet = martingalebet * betincrement; 
+	            martingaletpi = martingaletpi * takeprofitincrementinterval
+            }
             console.log('next game will use bet of ' + martingalebet + ' with a take profit multiplier of ' + martingaletpi); 
             martingaleplayedcount++; 
         }
@@ -505,7 +519,7 @@ function log_post_game_data(gamedata) {
 	}
 	console.log("martingale game counts shown below:"); 
 	console.log(JSON.stringify(martingalegamecounts)); 
-
+	playedalternate = false; 
 } 
 
 function log_cashout_data(gamedata) { 
