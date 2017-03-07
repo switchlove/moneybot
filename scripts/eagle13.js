@@ -13,11 +13,8 @@ var bet_multiplier = 200; // READ THE COMMENT ABOVE - 200 is representative of 2
 
 /** GAME STATE VARIABLES -- DO NOT MESS WITH THESE UNLESS YOU KNOW EXACTLY WHAT YOU ARE DOING **/
 var game_count = 0; 
-
 var game_records = {}; 
-var current_game_guid = 'INITIALIZING'; 
-
-
+var current_game_guid = ''; 
 engine.on('game_starting', place_bets); 
 engine.on('game_started', play_game); 
 engine.on('game_crash', game_over); 
@@ -36,7 +33,6 @@ function place_bets(game_data) {
 	current_game_guid = game_guid; 
 	game_records[game_guid] = {}; 
 	game_records[game_guid]['pre_game_data']= game_data; 
-
 	console.log('game id: #' + game_count + ' (UID: ' + game_guid + ')'); 
 	console.log('placing bet: ' + initial_bet + ' (cashout @ ' + parseFloat((bet_multiplier / 100.0)) + ')'); 
 	engine.placeBet(format_bet(initial_bet), bet_multiplier, false);  
@@ -55,9 +51,7 @@ function play_game(game_data) {
 function game_over(game_data) { 
 	console.log(''); 
 	game_records[current_game_guid]['post_game_data'] = game_data; 
-	console.log('game is over'); 
-	console.log(JSON.stringify(game_records)); 
-
+	console.log('game #' + game_count + ' is over'); 
 }
 /** END ENGINE FUNCTIONS **/ 
 
