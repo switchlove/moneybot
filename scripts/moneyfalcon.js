@@ -26,6 +26,7 @@
 // ==> SEND DONATIONS TO SUPPORT FUTURE DEVELOPMENT: 1AVoq4UTbJS42cUq85WN7yRQHoxHtxKA7m
 
 /** VARIABLE DECLARATIONS */ 
+// ** READ ME: your username must be entered EXACTLY as it appears in the game - otherwise FALCON commands in chat WILL NOT WORK **
 var username = 'beebo' 										// Put your remote username here (to send chat messages to your FALCON bot)
 var startingbet = 10; 										// This is the amount of bits where FALCON bot will start your bet in MARTINGALE and MARTINGALE_HYBRID modes
 var betincrement = 1.065; 									// This is the amount your bet will increase each turn in MARTINGALE and MARTINGALE_HYBRID modes
