@@ -27,12 +27,12 @@
 
 /** VARIABLE DECLARATIONS */ 
 var username = 'beebo' 										// Put your remote username here (to send chat messages to your FALCON bot)
-var startingbet = 13; 										// This is the amount of bits where FALCON bot will start your bet in MARTINGALE and MARTINGALE_HYBRID modes
+var startingbet = 10; 										// This is the amount of bits where FALCON bot will start your bet in MARTINGALE and MARTINGALE_HYBRID modes
 var betincrement = 1.065; 									// This is the amount your bet will increase each turn in MARTINGALE and MARTINGALE_HYBRID modes
-var recovertpi = 0.0096; 
+var recovertpi = 0.1388296; 
 var rightsidetpi = 314; 
-var emergencytpi = 0.0195; 
-var emergencymultiplier = 125; 										
+var emergencytpi = 0.1211895; 
+var emergencymultiplier = 198; 										
 var takeprofitpoint = 1899; 								// This is where you will take profit (1899 means 18.99 in bustabit, as there is no concept of decimals in BaB scripts)
 var takeprofitincrementinterval = 0.9998;					// This is the amount your takeprofitpoint will be increased each turn in MARTINGALE and MARTINGALE_HYBRID modes
 var increasemartingalebase = 1.33; 							// How much to increase the martingale base bet on a successful win (modifies startingbet on each martingale win if the 'increasemartingalebasebetonwin' is set to true) 
@@ -143,15 +143,15 @@ function start_game(gamedata) {
     summarize(); 
     pregamebalance = engine.getBalance();
     randomten = Math.floor((Math.random() * 10) + 1); // do not touch
-
-    if (randomten % 8 == 0) { 
+    var otherrandom = Math.floor((Math.random() * 10) + 1); // do not touch
+    if (randomten % 8 == 0 || otherrandom == 3) {
         var lebet = (engine.getBalance() / 100) * emergencytpi;
         var tpi =  emergencymultiplier; 
         console.log('calling placebet ' + lebet + ' with take profit multiplier of ' + tpi); 
         engine.placeBet(formatbet(lebet), tpi, false); 
         currentbet = lebet; 
 
-    }  else if (randomten % 9 == 0 || randomten % 7 == 0) { 
+    }  else if (randomten % 9 == 0) {
         var lebet = (engine.getBalance() / 100) * recovertpi;
         var tpi =  rightsidetpi; 
         console.log('calling placebet ' + lebet + ' with take profit multiplier of ' + tpi); 
