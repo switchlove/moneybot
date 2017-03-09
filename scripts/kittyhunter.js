@@ -116,7 +116,7 @@ function finish_game(game_data) {
 	var gamecrash = game_data.game_crash; 
 	var mybonus = game_data['bonuses'][engine.getUsername()] / 100; 
 
-	if (mybonus != undefined) { 
+	if (mybonus != undefined && mybonus != NaN) { 
 		console.log('---| My Bonus: ' + mybonus + 'bits'); 
 		bonusgameswon++; 
 	} else { 
