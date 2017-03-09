@@ -150,7 +150,7 @@ function finish_game(game_data) {
 		currentbet = currentbet + betincrease; 
 	}
 
-	if (gameslost % 100 == 0) { 
+	if (gameslost % 100 == 0 && gameslost != 0) { 
 		console.log('Another 100 games of loss detected - resetting teh sniper'); 
 		console.log(JSON.stringify(game_records)); 
 		console.log(JSON.stringify(player_record)); 
