@@ -127,7 +127,6 @@ function finish_game(game_data) {
 	console.log('---| Game #' + curgameid + ' (' + current_game_guid + ') is over. (Game Count: ' + gamecount
 		 + ")"); 
 	console.log('---| Game Crash: '  + gamecrash + 'x'); 
-	console.log('---| My Bonus: '  + mybonus + 'bits'); 
 	console.log(JSON.stringify(game_data)); 
 	game_records[current_game_guid]['post_game_data'] = game_data; 
 	var playresult = engine.lastGamePlay(); 
