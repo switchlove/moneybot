@@ -136,8 +136,8 @@ function finish_game(game_data) {
 
 	if (gameslost % 100 == 0) { 
 		console.log('Another 100 games of loss detected - resetting teh sniper'); 
-		currentbet = initialbet + 20; 
-		initialbet += 20; 
+		currentbet = initialbet + (gameslost / 100.0); 
+		initialbet += (gameslost / 100.0); 
 	} 
 	current_game_guid = guid(); 
 }
