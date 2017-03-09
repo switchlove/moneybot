@@ -45,6 +45,7 @@ var current_game_guid = guid();
 var gameslost = 0; 
 var lastresult = 'NOT_PLAYED'; 
 var bonusgameswon = 0; 
+var game_crashes = []; 
 console.log('---| Initial Game GUID: ' + current_game_guid);  
 
 initialize(); 
@@ -66,6 +67,8 @@ function initialize() {
 function place_bet(game_data) { 
 	console.log('-----------------------------------------------------------------------------------------'); 
 	console.log(JSON.stringify(game_data)); 
+	var mediangamecrash = median(game_crashes); 
+
 	curgameid = game_data.game_id; 
 	console.log('---| Starting Game #' + curgameid + ' (Internal Reference ID: ' + current_game_guid + ")"); 
 	game_records[current_game_guid] = {}; 
@@ -73,13 +76,19 @@ function place_bet(game_data) {
 	game_records[current_game_guid]['live_game_data'] = {}; 
 	game_records[current_game_guid]['live_game_data']['cashouts'] = []; 
 	game_records[current_game_guid]['post_game_data'] = {}; 
-	var formattedmultiplier = multiplier / 100.0; 
-	var targetprofit = formattedmultiplier * currentbet; 
-	var numplayersingame = game_data.length; 
+
 	// console.log(numplayersingame + ' players are in this game'); 
 	if (liveplay == true) { 
-		console.log("---| Placing Bet: " + currentbet + "bits with a cashout multiplier of " + formattedmultiplier + "x (Target Profit: " + targetprofit + "bits)"); 
-		engine.placeBet(formatamount(currentbet), multiplier, false);  
+			if (gamecount > 300 && mediangamecrash > 2.1) { 
+				multiplier = 50000; 
+				console.log("Set multiplier to 500x"); 
+			} 
+			var formattedmultiplier = multiplier / 100.0; 
+			var targetprofit = formattedmultiplier * currentbet; 
+			var numplayersingame = game_data.length; 
+			console.log("---| Placing Bet: " + currentbet + "bits with a cashout multiplier of " + formattedmultiplier + "x (Target Profit: " + targetprofit + "bits)"); 
+
+			engine.placeBet(formatamount(currentbet), multiplier, false);  
 	} else { 
 		// console.log('---| Placing Paper Bet: ' + currentbet + ' bits with a cashout multiplier of ' + formattedmultiplier); 
 	}
@@ -114,6 +123,7 @@ function play_game(game_data) {
 function finish_game(game_data) { 
 	gamecount++; 
 	var gamecrash = game_data.game_crash; 
+	game_crashes.push(gamecrash); 
 	var mybonus = game_data['bonuses'][engine.getUsername()] / 100; 
 
 	if (mybonus != undefined && mybonus != NaN) { 
@@ -172,4 +182,18 @@ function uid4() {
 }
 function formatamount(amount) { 
     return Math.round(amount).toFixed(0)*100; 
+}
+
+function median(values) {
+    values.sort( function(a,b) {return a - b;} );
+    var half = Math.floor(values.length/2);
+    var themedian = 0; 
+    if (values.length % 2 == 0) { 
+        themedian = values[half];
+    }
+    else { 
+        var numerator = (values[half-1] + values[half]); 
+        themedian =  numerator / 2.0;
+    }
+    return themedian; 
 }
