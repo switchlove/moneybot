@@ -135,7 +135,8 @@ function finish_game(game_data) {
 		console.log('Didnt play'); 
 	} else if (playresult == ('WON')) { 
 		if (playeroverride == true) { 
-			console.log("---| A human manually intervened and we won the game.  Not stopping the script.")
+			console.log("---| A human manually intervened and we won the game.  Not stopping the script and continuing to increase the bet"); 
+			currentbet = currentbet + betincrease; 
 		} else { 
 			console.log("WE SNIPED THE KITTY.  TIME TO BAG IT AND TAG IT."); 
 			console.log("STOPPING $CRIPT"); 
