@@ -81,35 +81,7 @@ for (var thing in game_history_record) {
 }
 // console.log(JSON.stringify(startingdata)); 
 
-var biggestwincount = 0; 
-var biggestwinner = ''; 
-var biggestwinnerdict = {}; 
-var maxpl = 0; 
-var biggestwinnercountplayer = ''; 
-for (var player in player_record) { 
-	var playerwincount = player_record[player]['wincount']; 
 
-	var playerpl = player_record[player]['total_profit_loss']; 
-
-	if (playerpl > maxpl) { 
-		maxpl = playerpl;
-		biggestwinner = player; 
-	}
-	console.log(player + ' win count is ' + playerwincount + ' biggestwin count is ' + biggestwincount); 
-	if (playerwincount > biggestwincount) { 
-		biggestwincount = playerwincount; 
-		biggestwinnerdict['winner'] = player; 
-		biggestwinnerdict['count'] = playerwincount; 
-		console.log(player + '(' + biggestwincount + ' wins)'); 
-		biggestwinnercountplayer = player; 
-	}	
-} 
-console.log(biggestwinnerdict); 
-
-console.log('---'); 
-console.log('BIGGEST WINNER IS: ' + biggestwinner + ' WITH ' + maxpl + ' profit'); 
-console.log('MOST WINS IS: ' + biggestwinnercountplayer + ' WITH ' + biggestwincount + ' wins'); 
-console.log('---'); 
 // console.log(player_record['60lebanon']); 
 
 /** UTILITY FUNCTIONS **/

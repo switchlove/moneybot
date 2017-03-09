@@ -28,11 +28,11 @@
 /** VARIABLE DECLARATIONS */ 
 // ** READ ME: your username must be entered EXACTLY as it appears in the game - otherwise FALCON commands in chat WILL NOT WORK **
 var username = 'beebo' 										// Put your remote username here (to send chat messages to your FALCON bot)
-var startingbet = 10; 										// This is the amount of bits where FALCON bot will start your bet in MARTINGALE and MARTINGALE_HYBRID modes
+var startingbet = 150; 										// This is the amount of bits where FALCON bot will start your bet in MARTINGALE and MARTINGALE_HYBRID modes
 var betincrement = 1.065; 									// This is the amount your bet will increase each turn in MARTINGALE and MARTINGALE_HYBRID modes
-var recovertpi = 0.01388296; 
+var recovertpi = 0.04388296; 
 var rightsidetpi = 314; 
-var emergencytpi = 0.01211895; 
+var emergencytpi = 0.04211895; 
 var emergencymultiplier = 198; 										
 var takeprofitpoint = 1899; 								// This is where you will take profit (1899 means 18.99 in bustabit, as there is no concept of decimals in BaB scripts)
 var takeprofitincrementinterval = 0.9998;					// This is the amount your takeprofitpoint will be increased each turn in MARTINGALE and MARTINGALE_HYBRID modes
@@ -270,7 +270,7 @@ function process_chat_message(gamedata) {
     if (gamedata.message == 'FALCON help') { 
         engine.chat('[FALCONBOT]: Learn more about falcon bot at https://github.com/currentsea/moneybot'); 
     }
-    if (gamedata.username == username) { 
+    if (gamedata.username.toLowerCase() == username.toLowerCase()) { 
         var match = falconregexp.exec(gamedata.message);
 
         if (match != undefined) { 
