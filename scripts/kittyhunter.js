@@ -133,6 +133,12 @@ function finish_game(game_data) {
 		gameslost++; 
 		currentbet = currentbet + betincrease; 
 	}
+
+	if (gameslost % 100 == 0) { 
+		console.log('Another 100 games of loss detected - resetting teh sniper'); 
+		currentbet = initialbet + 20; 
+		initialbet += 20; 
+	} 
 	current_game_guid = guid(); 
 }
 
