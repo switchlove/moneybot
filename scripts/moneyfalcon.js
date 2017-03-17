@@ -263,7 +263,7 @@ function process_chat_message(gamedata) {
     if (gamedata.message == 'FALCON help') { 
         engine.chat('[FALCONBOT]: Learn more about falcon bot at https://github.com/currentsea/moneybot'); 
     }
-    if (gamedata.username == username) { 
+    if (gamedata.username.toLowerCase() == username.toLowerCase()) { 
         var match = falconregexp.exec(gamedata.message);
 
         if (match != undefined) { 
