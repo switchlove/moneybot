@@ -86,6 +86,7 @@ function place_bet(game_data) {
 	var numplayersingame = game_data.length; 
 	// console.log(numplayersingame + ' players are in this game'); 
 	if (liveplay == true) { 
+		lossrecovery = false; 
 		if (lossrecovery == true) { 
 			console.log("Placing loss recovery bet: " + losses + "bits " + " with a multiplier of " + lossrecoverymultiplier / 100.0 + "x");
 	 		engine.placeBet(formatamount(losses), lossrecoverymultiplier, false);  
