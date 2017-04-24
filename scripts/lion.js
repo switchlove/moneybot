@@ -27,7 +27,7 @@
 
 /* GLOBAL VARIABLES */ 
 var username = ''; 
-var initialmultiplier = 10000; 
+var initialmultiplier = 100000; 
 var initialbalance = 0; 
 var initialbet = 33; 
 var betincrease = 1.0002; 
