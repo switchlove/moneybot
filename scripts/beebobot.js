@@ -12,6 +12,7 @@ var username = '';
 var tpi = 1000; 
 var initialbalance = engine.getBalance() / 100; 
 var initialbet = 1; 
+var curbet = initialbet; 
 var verbose = true; // with verbosity in logs 
 var testing = true; // test or not 
 var minconsiderationpayoutmultiplier = 1.5; 
@@ -88,17 +89,17 @@ function cash_out(gamedata) {
 		engine.chat('Final vote tally: CASHOUT_EARLY: ' + cashoutvotes + ' | ' + ' KEEP_CHASING: ' + keepchasingvotes); 
 		finalvotetallyposted = true; 
 	} 
-	if (engine.getCurrentPayout() > minconsiderationpayoutmultiplier && engine.getCurrentPayout() <= maxconsiderationpayoutmultiplier) { 
+	if (engine.getCurrentPayout() >= maxconsiderationpayoutmultiplier) { 
 		playing = false; 
 			
 		if (cashoutvotes > keepchasingvotes && finalvoteresultposted == false) { 
 			engine.chat('We will cash out early for this round.'); 
-			engine.cashOut(true); 
+			engine.cashOut(cocallback); 
 			finalvoteresultposted = true; 
 		} else if (keepchasingvotes > cashoutvotes && finalvoteresultposted == false) { 
 			engine.chat('We will keep chasing.'); 
 			finalvoteresultposted = true; 
-		} else if (keepchasingvotes == cashoutvotes && finalvoteresultposted == false) { 
+		} else if (keepchasingvotes == cashoutvotes && finalvoteresultposted == false && engine.getCurrentPayout() >= maxconsiderationpayoutmultiplier) { 
 			engine.chat('We had a tie in the votes cast.  We will pick a random number to decide our next outcome.'); 
 			randomten = Math.floor((Math.random() * 10) + 1); 	
 			if (randomten % 2 == 0) { 
@@ -128,7 +129,12 @@ function cash_out(gamedata) {
 } 
 
 function finish_game(gamedata) { 
-
+	console.log(JSON.stringify(gamedata)); 
+	finalvotetallyposted = false; 
+	finalvoteresultposted = false; 
+	cashoutvotes = 0; 
+	keepchasingvotes = 0; 
+	
 }
 
 function guid() {
@@ -144,6 +150,10 @@ function formatamount(amount) {
 
 function sleep(time) {
   return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+function formatbet(betamount) { 
+    return Math.round(betamount).toFixed(0)*100; 
 }
 
 
