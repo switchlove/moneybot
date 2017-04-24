@@ -27,29 +27,24 @@
 
 /* GLOBAL VARIABLES */ 
 var username = ''; 
-var initialmultiplier = 40000; 
+var initialmultiplier = 100000; 
 var initialbalance = 0; 
-var initialbet = 5; 
-var betincrease = 1.0003; 
+var initialbet = 33; 
+var betincrease = 1.0002; 
 var currentbet = initialbet; 
 var multipier = 100; 
-var lossrecoverybet = 150; 
-var gamerecoveryinterval = 100; 
-var lossrecoverymultiplier = 197; 
-var currentroundlosses = 0; 
 var targetbonus = 0; 
 var liveplay = true; 
-var lostrecoverybet = 0; 
 var playeroverridecount = 0; 
 var playeroverride = false; 
-var lossrecovery = false; 
-var losses = 0; 
 var gamecount = 0; 
 var game_records = {}; 
 var player_record = {}; 
 var curgameid = 0; 
 var current_game_guid = guid(); 
 var gameslost = 0; 
+var wincount = 0; 
+var maxwins = 150; 
 var lastresult = 'NOT_PLAYED'; 
 var bonusgameswon = 0; 
 console.log('---| Initial Game GUID: ' + current_game_guid);  
@@ -75,7 +70,6 @@ function place_bet(game_data) {
 	console.log(JSON.stringify(game_data)); 
 	curgameid = game_data.game_id; 
 	console.log('---| Starting Game #' + curgameid + ' (Internal Reference ID: ' + current_game_guid + ")"); 
-	console.log('---| Current Losses: ' + losses + 'bits'); 
 	game_records[current_game_guid] = {}; 
 	game_records[current_game_guid]['pre_game_data'] = game_data; 
 	game_records[current_game_guid]['live_game_data'] = {}; 
@@ -86,28 +80,91 @@ function place_bet(game_data) {
 	var numplayersingame = game_data.length; 
 	// console.log(numplayersingame + ' players are in this game'); 
 	if (liveplay == true) { 
-		lossrecovery = false; 
-		if (lossrecovery == true) { 
-			console.log("Placing loss recovery bet: " + losses + "bits " + " with a multiplier of " + lossrecoverymultiplier / 100.0 + "x");
-	 		engine.placeBet(formatamount(losses), lossrecoverymultiplier, false);  
-		}  else { 
-			console.log("---| Placing Bet: " + currentbet + "bits with a cashout multiplier of " + formattedmultiplier + "x (Target Profit: " + targetprofit + "bits)"); 
-			engine.placeBet(formatamount(currentbet), multiplier, false);  
-		} 
-
+		console.log("---| Placing Bet: " + currentbet + "bits with a cashout multiplier of " + formattedmultiplier + "x (Target Profit: " + targetprofit + "bits)"); 
+		engine.placeBet(formatamount(currentbet), multiplier, false);  
 	} else { 
 		// console.log('---| Placing Paper Bet: ' + currentbet + ' bits with a cashout multiplier of ' + formattedmultiplier); 
 	}
 } 
 
 function cash_out(game_data) { 
+
 	game_records[current_game_guid]['live_game_data']['cashouts'].push(game_data); 
+
+	if (game_data.stopped_at > 7500 && gamecount % 5 == 0) { 
+		engine.cashOut(cocallback); 
+		engine.cashOut("Cashed out above 75x"); 
+	} 
+
+
+	if (game_data.stopped_at > 800 && gamecount % 3 == 0) { 
+		engine.cashOut(cocallback); 
+		console.log("Cashed out above 8x"); 
+	} 
+
+
+	if (game_data.stopped_at > 200 && gamecount % 5 == 0) { 
+		var randomten = Math.floor((Math.random() * 10) + 1); // do not touch
+		if (randomten % 2 == 0) { 
+			engine.cashOut(cocallback); 
+			console.log("Cashed out above 8x"); 
+		} 
+	} 
+
+
+
+	if (game_data.stopped_at > 444 && gamecount % 7 == 0) { 
+		var randomten = Math.floor((Math.random() * 10) + 1); // do not touch
+		if (randomten % 2 == 0) { 
+			engine.cashOut(cocallback); 
+			console.log("Cashed out above 8x"); 
+		} 
+	} 
+
+
+
+	// if (game_data.stopped_at > 500 && gamecount % 7 == 0) { 
+	// 	engine.cashOut(cocallback); 
+	// 	console.log("Cashed out above 5x"); 
+	// } 
+
+	// if (game_data.stopped_at > 200 && gamecount % 10 == 0) { 
+	// 	engine.cashOut(cocallback); 
+	// 	console.log("Cashed out above 2x"); 
+	// } 
+
+	// if (game_data.stopped_at > 314 && gamecount % 2 == 1) { 
+	// 	engine.cashOut(cocallback); 
+	// 	console.log("Cashed out above 3.14x"); 
+	// } 
+
+
+	if (game_data.stopped_at > 1000 && gamecount % 2 == 0) { 
+		var randomten = Math.floor((Math.random() * 10) + 1); // do not touch
+		if (randomten % 2 == 0) { 
+
+			engine.cashOut(cocallback); 
+			console.log("Cashed out above 10x"); 
+		}
+	} 
+
+
+	// if (game_data.stopped_at > 176 && gamecount % 18 == 0) { 
+	// 	engine.cashOut(cocallback); 
+	// 	console.log("Cashed out above 1.76x"); 
+	// } 
+
+
 	if (game_data.username == engine.getUsername() && game_data.stopped_at < multiplier) { 
 		var ourbet = game_records[current_game_guid]['live_game_data']['initial_bets'][engine.getUsername()]['bet'] / 100; 
 		console.log("---| Player override cashout detected: " + ourbet + 'bits @' + game_data.stopped_at / 100.0 + 'x'); 
 		playeroverride = true; 
 		playeroverridecount++; 
 	} 
+} 
+
+function cocallback(data) { 
+	console.log("Cash out!"); 
 } 
 
 function play_game(game_data) { 
@@ -144,53 +201,40 @@ function finish_game(game_data) {
 	console.log('---| Game Crash: '  + gamecrash + 'x'); 
 	console.log(JSON.stringify(game_data)); 
 	game_records[current_game_guid]['post_game_data'] = game_data; 
-	var recoveryfipped = false; 
 	var playresult = engine.lastGamePlay(); 
 	if (playresult == 'NOT_PLAYED') { 
 		console.log('Didnt play'); 
 	} else if (playresult == ('WON')) { 
-		if (lossrecovery == true) { 
-			console.log("Losses recovered."); 
-			lossrecovery = false; 
-			recoveryfipped = true; 
-			lossrecoverybet = 0; 
-		} else if (playeroverride == true) { 
+		if (playeroverride == true) { 
 			console.log("---| A human manually intervened and we won the game.  Not stopping the script and continuing to increase the bet"); 
 			currentbet = currentbet + betincrease; 
 		} else { 
-			console.log("WE SNIPED THE KITTY.  TIME TO BAG IT AND TAG IT."); 
-			console.log("STOPPING $CRIPT"); 
-			console.log("FINAL GAME RECORDS SHOWN BELOW"); 
-			console.log(JSON.stringify(game_records)); 
-			console.log(JSON.stringify(player_record));
-			
-			engine.stop(); 
+			wincount = wincount + 1 
+
+			if (wincount == maxwins) { 
+				console.log("WE SNIPED THE KITTY.  TIME TO BAG IT AND TAG IT."); 
+				console.log("STOPPING $CRIPT"); 
+				console.log("FINAL GAME RECORDS SHOWN BELOW"); 
+				console.log(JSON.stringify(game_records)); 
+				console.log(JSON.stringify(player_record));
+				engine.stop(); 
+			}
 		} 
 	} else { 
 		console.log("We lost."); 
 		gameslost++; 
-		losses += currentbet; 
-		currentroundlosses += currentbet; 
 		currentbet = currentbet + betincrease; 
-		if (lossrecovery == true) { 
-			lossrecoverybet = lossrecoverybet * 2; 
-		} 
+		multiplier = multiplier + 200; 
 	}
 
-	if (gameslost % gamerecoveryinterval == 0 && gameslost != 0) { 
+	if (gameslost % 100 == 0 && gameslost != 0) { 
 		console.log('Another 100 games of loss detected - resetting teh sniper'); 
 		console.log(JSON.stringify(game_records)); 
 		console.log(JSON.stringify(player_record)); 
 		console.log("NUMBER OF PLAYER OVERRIDES: " + playeroverridecount); 
 		currentbet = initialbet + (gameslost / 100.0); 
 		initialbet += (gameslost / 100.0); 
-		console.log("Total losses after 100 rounds: " + currentroundlosses); 
-		if (lossrecovery == false && recoveryfipped == false) { 
-
-			lossrecovery = true; 
-		}
-		// 	lostrecoverybet = formatamount(losses); 
-		// } 
+		multiplier = initialmultiplier; 
 	} 
 	current_game_guid = guid(); 
 	playeroverride = false; 
