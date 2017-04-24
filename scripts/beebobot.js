@@ -11,6 +11,7 @@
 var username = ''; 
 var tpi = 100000; 
 var gameswon = 0; 
+var maxgames = 0; 
 var gameslost = 0; 
 var bitswon = 0; 
 var bitslost = 0; 
@@ -20,8 +21,8 @@ var initialbet = 1;
 var curbet = initialbet; 
 var verbose = true; // with verbosity in logs 
 var testing = true; // test or not 
-var minconsiderationpayoutmultiplier = 50.0; 
-var maxconsiderationpayoutmultiplier = 100.0; 
+var minconsiderationpayoutmultiplier = 20.0; 
+var maxconsiderationpayoutmultiplier = 75.0; 
 var cashoutvotes = 0; 
 var keepchasingvotes = 0; 
 var finalvotetallyposted = false; 
@@ -34,7 +35,7 @@ var preroundbalance = initialbalance;
 var gamerecoveryinterval = 100; 
 
 if (testing == true) { 
-	engine.chat('[BeeboBot - TEST MODE - not actively accepting suggestions]: BeeboBot has come online - initial balance: ' + engine.getBalance() / 100 + ' refid: ' + guid() + ' (For bot instructions, go here: https://pastebin.com/raw/BFSyQ4kn'); 
+	engine.chat('[BeeboBot]: {{PLACE VOTES BETWEEN ' + minconsiderationpayoutmultiplier + 'x AND ' + maxconsiderationpayoutmultiplier +  'x}} ~~ BeeboBot has come online - initial balance: ' + engine.getBalance() / 100 + ' refid: ' + guid() + ' (For bot instructions, go here: https://pastebin.com/raw/BFSyQ4kn'); 
 } 
 
 engine.on('disconnected', script_disconnected); 
@@ -45,6 +46,11 @@ engine.on('game_crash', finish_game);
 engine.on('msg', process_chat_message); 
 
 function process_chat_message(gamedata) { 
+
+	if (gamedata.message == '!bb TERMINATE' && gamedata.username == 'beebo') { 
+		engine.chat('OUR MASTER TOLD US TO STOP. THEREFORE, WE WILL STOP IMMEDIATELY. SHUT IT DOWN. SHUT IT ALL DOWN.'); 
+		engine.stop(); 
+	} 
 	if (gamedata.message == 'BeeboBot stats' || gamedata.message == '!bb stats') { 
 
 		engine.chat('Games Won: ' + gameswon + ' | Games Lost: ' + gameslost + ' | Net Profit/Loss for Run: ' + Math.round((bitslost * -1) + bitswon) + 'bits'); 
@@ -187,6 +193,11 @@ function finish_game(gamedata) {
 		// } 
 	} else if (engine.lastGamePlay() != 'NOT_PLAYED') { 
 		curbet = curbet + betincrease; 
+		gamesplayed++; 
+	}
+
+	if (gamesplayed >= maxgames) { 
+		engine.chat('Final game played - #' + gamesplayed + ' have successfully elapsed. Terminating.'); 
 	}
 	
 
