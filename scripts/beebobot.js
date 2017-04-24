@@ -22,6 +22,9 @@ var keepchasingvotes = 0;
 var finalvotetallyposted = false; 
 var finalvoteresultposted = false; 
 var randomten = Math.floor((Math.random() * 10) + 1); 	
+var mode = 'INITIALIZING'; 
+var curroundcashoutvoters = []; 
+var curroundkeepchasingvoters = []; 
 
 if (testing == true) { 
 	engine.chat('[BeeboBot - TEST MODE - not actively accepting suggestions]: BeeboBot has come online - initial balance: ' + engine.getBalance() / 100 + ' refid: ' + guid() + ' (For bot instructions, go here: https://pastebin.com/raw/BFSyQ4kn'); 
@@ -36,12 +39,14 @@ engine.on('msg', process_chat_message);
 
 function process_chat_message(gamedata) { 
 	if (engine.getCurrentPayout() > minconsiderationpayoutmultiplier && engine.getCurrentPayout() <= maxconsiderationpayoutmultiplier) { 
-		if (gamedata.message == 'CASHOUT BeeboBot') { 
+		if (gamedata.message == 'CASHOUT BeeboBot' && gamedata.bot == false) { 
 			engine.chat('CASHOUT Vote recorded - ' + gamedata.username); 
 			cashoutvotes++; 
-		} else if (gamedata.message == 'KEEP CHASING BeeboBot') { 
+			curroundcashoutvoters.push(gamedata.username); 
+		} else if (gamedata.message == 'KEEP CHASING BeeboBot' && gamedata.bot == false) { 
 			engine.chat('KEEP CHASING Vote recorded - ' + gamedata.username); 
 			keepchasingvotes++; 
+			curroundkeepchasingvoters.push(gamedata.username); 
 		} 
 	} 
 	console.log('-----'); 
@@ -96,17 +101,21 @@ function cash_out(gamedata) {
 			engine.chat('We will cash out early for this round.'); 
 			engine.cashOut(cocallback); 
 			finalvoteresultposted = true; 
+			mode = 'CASHOUT_EARLY'; 
 		} else if (keepchasingvotes > cashoutvotes && finalvoteresultposted == false) { 
 			engine.chat('We will keep chasing.'); 
+			mode = 'KEEP_CHASING'; 
 			finalvoteresultposted = true; 
 		} else if (keepchasingvotes == cashoutvotes && finalvoteresultposted == false && engine.getCurrentPayout() >= maxconsiderationpayoutmultiplier) { 
 			engine.chat('We had a tie in the votes cast.  We will pick a random number to decide our next outcome.'); 
 			randomten = Math.floor((Math.random() * 10) + 1); 	
 			if (randomten % 2 == 0) { 
 				engine.chat('The random number suggested cashout early.  Acknowledging.'); 
+				mode = 'CASHOUT_EARLY'; 
 				engine.cashOut(cocallback); 
 			} else { 
 				engine.chat('The random number suggested to continue chase.  Acknowledging.'); 
+				mode = 'KEEP_CHASING'; 
 			} 
 			finalvoteresultposted = true;
 		} 
@@ -129,12 +138,31 @@ function cash_out(gamedata) {
 } 
 
 function finish_game(gamedata) { 
+
+
+
 	console.log(JSON.stringify(gamedata)); 
+	var lastcrash = gamedata.game_crash; 
+	if (mode == 'CASHOUT_EARLY' && lastcrash < tpi && engine.lastGamePlay() == 'WON') { 
+		engine.chat('The players who voted for CASHOUT_EARLY made a successful call and will be considered for the next round of rewards. Players: ' + JSON.stringify(curroundcashoutvoters)); 
+	} else if (mode == 'CASHOUT_EARLY' && lastcrash >= tpi && engine.lastGamePlay() == 'WON') { 
+		engine.chat('The audience voted for cashout early, but the nyan hit.  No consideration given to any votes made for this round.'); 
+	} else if (mode == 'KEEP_CHASING' && lastcrash < tpi && engine.lastGamePlay() == 'LOST') { 
+		engine.chat('The audience told us to keep chasing, but it busted.  Fucking lame.'); 
+	} else if (mode == 'KEEP_CHASING' && lastcrash >= tpi && engine.lastGamePlay() == 'WON') { 
+		engine.chat('The audience suggested to continue chasing, and they were correct.  We are terminating the execution of this round.  Final reference guid: ' + guid() + '. Players included in reward pool for nyan hit: ' + JSON.stringify(curroundkeepchasingvoters)); 
+	} 
+
+
 	finalvotetallyposted = false; 
 	finalvoteresultposted = false; 
 	cashoutvotes = 0; 
 	keepchasingvotes = 0; 
-	
+
+	curroundkeepchasingvoters = []; 
+	curroundcashoutvoters = []; 
+	mode = 'INITIALIZING'; 
+
 }
 
 function guid() {
