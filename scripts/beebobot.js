@@ -9,14 +9,19 @@
 // sleep(1000); 
 // engine.chat('[BeeboBot]: If the CASHOUT option is suggested more than the KEEP CHASING option, we will attempt to close as soon as possible once the game goes past 100x. If we are successful, 10% of the winnings will be split amongst those who helped make the proper suggestion.');  
 var username = ''; 
-var tpi = 1000; 
+var tpi = 100000; 
+var gameswon = 0; 
+var gameslost = 0; 
+var bitswon = 0; 
+var bitslost = 0; 
+var betincrease = 1.0003; 
 var initialbalance = engine.getBalance() / 100; 
 var initialbet = 1; 
 var curbet = initialbet; 
 var verbose = true; // with verbosity in logs 
 var testing = true; // test or not 
-var minconsiderationpayoutmultiplier = 1.5; 
-var maxconsiderationpayoutmultiplier = 2.5; 
+var minconsiderationpayoutmultiplier = 50.0; 
+var maxconsiderationpayoutmultiplier = 100.0; 
 var cashoutvotes = 0; 
 var keepchasingvotes = 0; 
 var finalvotetallyposted = false; 
@@ -25,6 +30,8 @@ var randomten = Math.floor((Math.random() * 10) + 1);
 var mode = 'INITIALIZING'; 
 var curroundcashoutvoters = []; 
 var curroundkeepchasingvoters = []; 
+var preroundbalance = initialbalance; 
+var gamerecoveryinterval = 100; 
 
 if (testing == true) { 
 	engine.chat('[BeeboBot - TEST MODE - not actively accepting suggestions]: BeeboBot has come online - initial balance: ' + engine.getBalance() / 100 + ' refid: ' + guid() + ' (For bot instructions, go here: https://pastebin.com/raw/BFSyQ4kn'); 
@@ -38,19 +45,24 @@ engine.on('game_crash', finish_game);
 engine.on('msg', process_chat_message); 
 
 function process_chat_message(gamedata) { 
+	if (gamedata.message == 'BeeboBot stats' || gamedata.message == '!bb stats') { 
+
+		engine.chat('Games Won: ' + gameswon + ' | Games Lost: ' + gameslost + ' | Net Profit/Loss for Run: ' + Math.round((bitslost * -1) + bitswon) + 'bits'); 
+		// engine.chat('Games Won: ' + gameswon + '[Bits Won: ' + bitswon + '] | ' + 'Games Lost: ' + gameslost + ' [Bits Lost: ' + bitslost + '] | Net Profit Since Bot Initialization: ' + initialbalance - (bitslost + bitswon)); 
+	} 
 	if (engine.getCurrentPayout() > minconsiderationpayoutmultiplier && engine.getCurrentPayout() <= maxconsiderationpayoutmultiplier) { 
-		if (gamedata.message == 'CASHOUT BeeboBot' && gamedata.bot == false) { 
+		if (gamedata.message == 'CASHOUT BeeboBot' || gamedata.message == '!bb CASHOUT' && gamedata.bot == false) { 
 			engine.chat('CASHOUT Vote recorded - ' + gamedata.username); 
 			cashoutvotes++; 
 			curroundcashoutvoters.push(gamedata.username); 
-		} else if (gamedata.message == 'KEEP CHASING BeeboBot' && gamedata.bot == false) { 
+		} else if (gamedata.message == 'KEEP CHASING BeeboBot' || gamedata.message == '!bb KEEP CHASING' && gamedata.bot == false) { 
 			engine.chat('KEEP CHASING Vote recorded - ' + gamedata.username); 
 			keepchasingvotes++; 
 			curroundkeepchasingvoters.push(gamedata.username); 
 		} 
 	} 
 	console.log('-----'); 
-	console.log(engine.getCurrentPayout() + ' MESSAGE SHOWN BELOW'); 
+	console.log(' MESSAGE SHOWN BELOW'); 
 	console.log(JSON.stringify(gamedata)); 
 	console.log('-----'); 
 }
@@ -64,6 +76,7 @@ function script_disconnected(gamedata) {
 } 
 
 function place_bet(gamedata) { 
+	preroundbalance = engine.getBalance() / 100; 
     engine.placeBet(formatbet(curbet), tpi, false); 
 
 } 
@@ -89,7 +102,6 @@ function play_game(gamedata) {
 
 function cash_out(gamedata) { 
 	var curpayout = engine.getCurrentPayout(); 
-
 	if (finalvotetallyposted == false && engine.getCurrentPayout() > maxconsiderationpayoutmultiplier) { 
 		engine.chat('Final vote tally: CASHOUT_EARLY: ' + cashoutvotes + ' | ' + ' KEEP_CHASING: ' + keepchasingvotes); 
 		finalvotetallyposted = true; 
@@ -120,21 +132,6 @@ function cash_out(gamedata) {
 			finalvoteresultposted = true;
 		} 
 	} 
-	// if (curpayout > minconsiderationpayoutmultiplier && curpayout <= maxconsiderationpayoutmultiplier) { 
-
-	// } 
-
-	// console.log('CURRENT PAYOUT: ' + curpayout); 
- //    if (verbose == true) { 
- //        console.log('--------- CHAT MESSAGE BELOW -----------'); 
- //        console.log(JSON.stringify(gamedata)); 
- //        console.log('---------- END CHAT MESSAGE ------------');
- //    } 
- //    if (gamedata.message == 'CASHOUT BeeboBot') { 
- //        engine.chat('[BeeboBot]: Suggestion of CASHOUT EARLY recorded for user ' + gamedata.username + ' - suggestion confirmation guid: ' + guid()); 
- //    } else if (gamedata.message == 'KEEP CHASING BeeboBot') { 
-	// 	engine.chat('')		
- //    } 
 } 
 
 function finish_game(gamedata) { 
@@ -142,6 +139,8 @@ function finish_game(gamedata) {
 
 
 	console.log(JSON.stringify(gamedata)); 
+	var postroundbalance = engine.getBalance() / 100; 
+	var roundbaldiff = postroundbalance - preroundbalance; 
 	var lastcrash = gamedata.game_crash; 
 	if (mode == 'CASHOUT_EARLY' && lastcrash < tpi && engine.lastGamePlay() == 'WON') { 
 		engine.chat('The players who voted for CASHOUT_EARLY made a successful call and will be considered for the next round of rewards. Players: ' + JSON.stringify(curroundcashoutvoters)); 
@@ -151,6 +150,16 @@ function finish_game(gamedata) {
 		engine.chat('The audience told us to keep chasing, but it busted.  Fucking lame.'); 
 	} else if (mode == 'KEEP_CHASING' && lastcrash >= tpi && engine.lastGamePlay() == 'WON') { 
 		engine.chat('The audience suggested to continue chasing, and they were correct.  We are terminating the execution of this round.  Final reference guid: ' + guid() + '. Players included in reward pool for nyan hit: ' + JSON.stringify(curroundkeepchasingvoters)); 
+		engine.stop(); 
+	} 
+
+	if (engine.lastGamePlay() == 'WON') { 
+		gameswon++; 
+		bitswon += roundbaldiff; 
+
+	} else if (engine.lastGamePlay() == 'LOST') { 
+		gameslost++; 
+		bitslost += roundbaldiff; 
 	} 
 
 
@@ -162,6 +171,24 @@ function finish_game(gamedata) {
 	curroundkeepchasingvoters = []; 
 	curroundcashoutvoters = []; 
 	mode = 'INITIALIZING'; 
+	if (gameslost % gamerecoveryinterval == 0 && gameslost != 0) { 
+		// console.log('Another 100 games of loss detected - resetting teh sniper'); 
+		// console.log(JSON.stringify(game_records)); 
+		// console.log(JSON.stringify(player_record)); 
+		// console.log("NUMBER OF PLAYER OVERRIDES: " + playeroverridecount); 
+		curbet = initialbet + gameslost / (gamerecoveryinterval * 1.0); 
+		initialbet += (gameslost / (gamerecoveryinterval * 1.0)); 
+		console.log("Total losses after 100 rounds: " + currentroundlosses); 
+		// if (lossrecovery == false && recoveryfipped == false) { 
+
+		// 	lossrecovery = true; 
+		// }
+		// 	lostrecoverybet = formatamount(losses); 
+		// } 
+	} else if (engine.lastGamePlay() != 'NOT_PLAYED') { 
+		curbet = curbet + betincrease; 
+	}
+	
 
 }
 
