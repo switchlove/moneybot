@@ -27,10 +27,11 @@
 
 /* GLOBAL VARIABLES */ 
 var username = ''; 
-var initialmultiplier = 100000; 
+var initialmultiplier = 200001; 
 var initialbalance = 0; 
 var initialbet = 1; 
 var betincrease = 1.0002; 
+var maxbet = 100; 
 var currentbet = initialbet; 
 var multipier = 100; 
 var targetbonus = 0; 
@@ -89,7 +90,7 @@ function cash_out(game_data) {
 	game_records[current_game_guid]['live_game_data']['cashouts'].push(game_data); 
 	if (game_data.username == engine.getUsername() && game_data.stopped_at < multiplier) { 
 		var ourbet = game_records[current_game_guid]['live_game_data']['initial_bets'][engine.getUsername()]['bet'] / 100; 
-		console.log("---| Player override cashout detected: " + ourbet + 'bits @' + game_data.stopped_at / 100.0 + 'x'); 
+		// console.log("---| Player override cashout detected: " + ourbet + 'bits @' + game_data.stopped_at / 100.0 + 'x'); 
 		playeroverride = true; 
 		playeroverridecount++; 
 	} 
@@ -102,7 +103,7 @@ function play_game(game_data) {
 	var targetbonus = game_data[engine.getUsername()]['bonus'] / 100;
 
 	if (playerbet != currentbet) { 
-		currentbet = playerbet; 
+		// currentbet = playerbet; 
 		playeroverridecount++; 
 		// console.log('---| Player override detected - bet of ' + playerbet + ' bits (target bonus: ' + targetbonus + ' bits)'); 
 	}
@@ -158,9 +159,28 @@ function finish_game(game_data) {
 		currentbet = initialbet + (gameslost / 100.0); 
 		initialbet += (gameslost / 100.0); 
 	} 
+
+	if (currentbet >= maxbet) { 
+		currentbet = maxbet; 
+	} 
 	current_game_guid = guid(); 
 	playeroverride = false; 
 }
+
+// Add this to your kitty scripts to celebrate a kitty catch!
+// guranteed to make your scripts better!
+function kitty() { 
+	console.log(' __________________');
+	console.log('< WE GOT THE KITTY >');
+	console.log(' ------------------');
+	console.log('     \'');
+	console.log('      \'');
+	console.log('       ("`-\\  \\-/") .___..--\\ \\ "`-._');
+	console.log('         ` o_ o  )    `-.   (      ) .`-.__. `)');
+	console.log('         (_Y_.) \\ ._   )   `._` ;  `` -. .-\\');
+	console.log('      _.. `--\\_..-_/   /--\\ _ .\\ ,4');
+	console.log('   ( i l ),-\\\\  ( l i),\\  ( ( ! .-\\');
+} 
 
 
 function guid() {
